@@ -1,7 +1,13 @@
 <component name="ProjectDictionaryState">
   <dictionary name="nmg">
     <words>
+      <w>amqp</w>
+      <w>fanout</w>
       <w>hyperline</w>
+      <w>kombu</w>
+      <w>msgtype</w>
+      <w>prifixed</w>
+      <w>unregister</w>
     </words>
   </dictionary>
 </component>

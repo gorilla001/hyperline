@@ -4,6 +4,7 @@ from pulsar import Protocol
 from pulsar.async.futures import Future
 from pulsar.async.mixins import Timeout
 from pulsar.async.events import EventHandler
+from impl_kombu import Connection as AMQPConnection
 
 _MESSAGE_PREFIX_LENGTH = 4
 
@@ -11,7 +12,7 @@ _BYTE_ORDER = 'big'
 
 class HyperLineConsumer(EventHandler):
 
-    _buffer = b''   # data buffer
+    _buffer = b''     # data buffer
     _msg_len = None   # message length
 
     def data_received(self, data):
@@ -96,12 +97,30 @@ class HyperLineConsumer(EventHandler):
         """
         raise NotImplementedError()
 
-class HyperLineProtocol(Protocol, Timeout):
-    def __init__(self, **kw):
-        super().__init__(**kw)
+    @property
+    def connection(self):
+        """The :class:`Connection` of this consumer."""
+        return self._connection
+
+    @property
+    def transport(self):
+        """The :class:`Transport` of this consumer"""
+        if self._connection:
+            return self._connection.transport
+
+    @property
+    def address(self):
+        if self._connection:
+            return self._connection.address
 
 
-class HyperLineConnection(HyperLineProtocol):
+# class HyperLineProtocol(Protocol, Timeout):
+#
+#     def __init__(self, **kw):
+#         super().__init__(**kw)
+
+
+class HyperLineConnection(Protocol, Timeout):
     """
     Connection used for every new client connection.
 
@@ -186,3 +205,148 @@ class HyperLineConnection(HyperLineProtocol):
         self.current_consumer()
         if self._current_consumer:
             self._current_consumer.connection_made(self)
+
+
+
+
+from twisted.internet import protocol
+
+class HyperLineProtocol(protocol.Protocol):
+
+    _buffer = b''     # data buffer
+    _msg_len = None   # message length
+
+    def _data_received(self, data):
+        """
+        Called when some data is received.
+
+        This method must be implemented by subclasses
+
+        The argument is a bytes object.
+        """
+        self._buffer += data
+
+        # For store the rest data out-of a full message
+        _buffer = None
+
+        if self._msg_len is None:
+            # If buffer length < _MESSAGE_PREFIX_LENGTH return for more data
+            if len(self._buffer) < _MESSAGE_PREFIX_LENGTH:
+                return
+
+            # If buffer length >= _MESSAGE_PREFIX_LENGTH
+            self._msg_len = int.from_bytes(self._buffer[:_MESSAGE_PREFIX_LENGTH], byteorder=_BYTE_ORDER)
+
+            # The left bytes will be the message body
+            self._buffer = self._buffer[_MESSAGE_PREFIX_LENGTH:]
+
+        # Received full message
+        if len(self._buffer) >= self._msg_len:
+            # Call message_received to handler message
+            self.message_received(self._buffer[:self._msg_len])
+
+            # Left the rest of the buffer for next message
+            _buffer = self._buffer[self._msg_len:]
+
+            # Clean data buffer for next message
+            self._buffer = b''
+
+            # Set message length to None for next message
+            self._msg_len = None
+
+        return _buffer
+
+    def message_received(self, msg):
+        """
+        Must override in subclass
+
+        :param msg: the full message
+        :return: None
+        """
+        raise NotImplementedError()
+
+    def dataReceived(self, data):
+
+        while data:
+            data = self._data_received(data)
+
+    def connection_made(self):
+
+        raise NotImplementedError()
+
+    def connection_lost(self, reason):
+
+        raise NotImplementedError()
+
+    def connectionMade(self):
+
+        return self.connection_made()
+
+    def connectionLost(self, reason):
+
+        return self.connection_lost(reason)
+
+import asyncio
+
+class HyperLineTestProtocol(asyncio.Protocol):
+
+    _buffer = b''     # data buffer
+    _msg_len = None   # message length
+
+    def connection_made(self, transport):
+        pass
+
+    def data_received(self, data):
+
+        #while data:
+        #    data = self._data_received(data)
+        print(data)
+
+    def _data_received(self, data):
+        """
+        Called when some data is received.
+
+        This method must be implemented by subclasses
+
+        The argument is a bytes object.
+        """
+        self._buffer += data
+
+        # For store the rest data out-of a full message
+        _buffer = None
+
+        if self._msg_len is None:
+            # If buffer length < _MESSAGE_PREFIX_LENGTH return for more data
+            if len(self._buffer) < _MESSAGE_PREFIX_LENGTH:
+                return
+
+            # If buffer length >= _MESSAGE_PREFIX_LENGTH
+            self._msg_len = int.from_bytes(self._buffer[:_MESSAGE_PREFIX_LENGTH], byteorder=_BYTE_ORDER)
+
+            # The left bytes will be the message body
+            self._buffer = self._buffer[_MESSAGE_PREFIX_LENGTH:]
+
+        # Received full message
+        if len(self._buffer) >= self._msg_len:
+            # Call message_received to handler message
+            self.message_received(self._buffer[:self._msg_len])
+
+            # Left the rest of the buffer for next message
+            _buffer = self._buffer[self._msg_len:]
+
+            # Clean data buffer for next message
+            self._buffer = b''
+
+            # Set message length to None for next message
+            self._msg_len = None
+
+        return _buffer
+
+    def message_received(self, msg):
+        """
+        Must override in subclass
+
+        :param msg: the full message
+        :return: None
+        """
+        raise NotImplementedError()
