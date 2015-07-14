@@ -8,7 +8,7 @@ from asyncio import Future
 from session import Session
 
 class MetaHandler(type):
-    """Metaclass for messagehandler"""
+    """Metaclass for MessageHandler"""
     def __init__(cls, name, bases, _dict):
         try:
             cls._msg_handlers[cls.__msgtype__] = cls
