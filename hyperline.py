@@ -4,12 +4,12 @@ import asyncio
 import json
 
 from protocol import HyperLineProtocol
-
 from handlers import MessageHandler
 
 class HyperLine(HyperLineProtocol):
 
-    def __init__(self, consumer_factory=None, message_handler=None):
+    def __init__(self, message_handler=None):
+
         self.handler = message_handler
         self.transport = None
 
@@ -44,5 +44,5 @@ class HyperLineServer(object):
 
 if __name__ == '__main__':
 
-    server = HyperLineServer(HyperLine, 'localhost', 2222)
+    server = HyperLineServer(HyperLine(MessageHandler), 'localhost', 2222)
     server.start()
