@@ -80,11 +80,11 @@ from twisted.internet.defer import Deferred
 #     server.start()
 
 import asyncio
-from protocol import HyperLineTestProtocol
+from protocol import HyperLineProtocol
 import json
 from handlers import MessageHandler
 
-class HyperLine(HyperLineTestProtocol):
+class HyperLine(HyperLineProtocol):
 
     def __init__(self):
         self.handler = MessageHandler()
