@@ -30,7 +30,7 @@ class Register(MessageHandler):
     """
     Registry handler for handling clients registry.
 
-    message body should like this:
+    Message body should like this:
 
         {'type': 'register', 'uid': 'unique-user-id'}
 
@@ -78,6 +78,11 @@ class Register(MessageHandler):
 class SendTextMsg(MessageHandler):
     """
     Send message to others.
+
+    Message body should like this:
+
+        {'type': 'text', 'sender': 'Jack', 'receiver': 'Rose', 'content': 'I love you forever'}
+
     """
     __msgtype__ = 'text'  # Text message
 
@@ -101,12 +106,19 @@ class SendTextMsg(MessageHandler):
         pass
 
 class Unregister(MessageHandler):
-    """Unregister user from global session"""
+    """
+    Unregister user from global session
+
+    Message body should like this:
+
+        {'type': 'unregister', 'uid': 'unique-user-id'}
+
+    """
     __msgtype__ = 'unregister'
 
     def handler(self, msg):
         """Unregister user record from global session"""
-        del self.session[msg['sender']]
+        self._session.unregister(msg['uid'])
 
 class ErrorHandler(MessageHandler):
     """

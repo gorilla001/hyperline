@@ -59,6 +59,6 @@ class Session(object):
         """Unregister client on session"""
         if client in self.clients:
             del self.clients[client]
-            
+
 if __name__ == '__main__':
     Session()
