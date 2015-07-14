@@ -1,12 +1,6 @@
 __author__ = 'nmg'
 
-import json
-from decorator import singleton
-import redis
-import pickle
-# # Global uid-connection pairs for store client  and its associated connection
-# sessions = {}
-# @singleton
+__all__ = ['Session']
 
 class Session(object):
 

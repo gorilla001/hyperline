@@ -1,5 +1,7 @@
 __author__ = 'nmg'
 
+__all__ = ['MessageHandler']
+
 import asyncio
 
 from struct import pack
@@ -19,12 +21,13 @@ class MessageHandler(metaclass=MetaHandler):
 
     _session = Session()
 
-    def __call__(self, msg):
+    def handle(self, msg, transport):
         try:
             _handler = self._msg_handlers[msg['type']]
-            return _handler().handler(msg)
         except KeyError:
             return ErrorHandler().handler(msg)
+
+        return _handler().handler(msg, transport)
 
 class Register(MessageHandler):
     """
@@ -41,10 +44,10 @@ class Register(MessageHandler):
         self.current_uid = None
         self.transport = None
 
-    def handler(self, msg):
+    def handler(self, msg, transport):
 
         self.current_uid = msg['uid']
-        self.transport = msg['transport']
+        self.transport = transport
 
         # Register user in global session
         self._session.register(self.current_uid, self.transport)
@@ -59,7 +62,7 @@ class Register(MessageHandler):
     def get_offline_msg(self, msg):
 
         # Get offline msg from mongodb. This will be block
-        result = yield from self.get_offline_msg_from_db(msg['sender'])
+        result = yield from self.get_offline_msg_from_db(self.current_uid)
 
         return result
 
@@ -68,12 +71,17 @@ class Register(MessageHandler):
         Send offline msgs to current user
         """
         for msg in msgs:
+            msg = msg.decode("utf-8")
             self.transport.write(pack("!I", len(msg)) + msg)
 
-    @staticmethod
-    def get_offline_msg_from_db(user):
+    @asyncio.coroutine
+    def get_offline_msg_from_db(self, uid):
         # Get offline msg from mongodb. This must return a `Future`.
-        return Future()
+        return [{'type': 'text',
+                 'sender': 'niuminguo',
+                 'receiver': 'niuminguo',
+                 'content': 'hello'
+                }]
 
 class SendTextMsg(MessageHandler):
     """
@@ -86,7 +94,7 @@ class SendTextMsg(MessageHandler):
     """
     __msgtype__ = 'text'  # Text message
 
-    def handler(self, msg):
+    def handler(self, msg, _):
         """
         Send message to receiver if receiver is online, and
         save message to mongodb. Otherwise save
@@ -116,7 +124,7 @@ class Unregister(MessageHandler):
     """
     __msgtype__ = 'unregister'
 
-    def handler(self, msg):
+    def handler(self, msg, transport):
         """Unregister user record from global session"""
         self._session.unregister(msg['uid'])
 

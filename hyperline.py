@@ -8,9 +8,10 @@ from handlers import MessageHandler
 
 class HyperLine(HyperLineProtocol):
 
-    def __init__(self, message_handler=None):
+    def __init__(self):
 
-        self.handler = message_handler
+        self.handler = MessageHandler()
+
         self.transport = None
 
     def connection_made(self, transport):
@@ -25,10 +26,9 @@ class HyperLine(HyperLineProtocol):
         """
         # Convert bytes msg to python dictionary
         msg = json.loads(msg.decode("utf-8"))
-        # Handler msg
-        msg['transport'] = self.transport
 
-        return self.handler(msg)
+        # Handler msg
+        return self.handler.handle(msg, self.transport)
 
 class HyperLineServer(object):
     def __init__(self, protocol_factory, host, port):
@@ -44,5 +44,5 @@ class HyperLineServer(object):
 
 if __name__ == '__main__':
 
-    server = HyperLineServer(HyperLine(MessageHandler), 'localhost', 2222)
+    server = HyperLineServer(HyperLine, 'localhost', 2222)
     server.start()
