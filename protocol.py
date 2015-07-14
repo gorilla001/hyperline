@@ -6,12 +6,17 @@ _MESSAGE_PREFIX_LENGTH = 4
 
 _BYTE_ORDER = 'big'
 
-class HyperLineConsumer(object):
+class HyperLineProtocol(asyncio.Protocol):
 
     _buffer = b''     # data buffer
     _msg_len = None   # message length
 
     def data_received(self, data):
+
+        while data:
+            data = self.process_data(data)
+
+    def process_data(self, data):
         """
         Called when some data is received.
 
@@ -59,47 +64,3 @@ class HyperLineConsumer(object):
         :return: None
         """
         raise NotImplementedError()
-
-class HyperLineProtocol(asyncio.Protocol):
-
-    def __init__(self, consumer_factory=None, **kwargs):
-        super().__init__(**kwargs)
-
-        self._current_consumer = None
-        self._consumer_factory = consumer_factory
-
-    def connection_made(self, transport):
-        """
-        When connection made, build consumer for currently handling incoming data.
-        :param transport:
-        :return:
-        """
-        self._current_consumer = self.build_consumer()
-
-    def data_received(self, data):
-
-        while data:
-            data = self._current_consumer.data_received(data)
-
-    def _build_consumer(self):
-        """
-        Build consumer from factory.
-
-        :return: the new build consumer
-        """
-        consumer = self._consumer_factory()
-        assert self._current_consumer is None, 'Consumer is not None'
-        self._current_consumer = consumer
-
-        return self._current_consumer
-
-    def build_consumer(self):
-        """
-        The :class:`HyperlineConsumer` currently handling incoming data.
-
-        If no consumer is available, build a new one and return it.
-        """
-        if self._current_consumer is None:
-            return self._build_consumer()
-
-        return self._current_consumer
