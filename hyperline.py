@@ -9,8 +9,8 @@ from handlers import MessageHandler
 
 class HyperLine(HyperLineProtocol):
 
-    def __init__(self):
-        self.handler = MessageHandler()
+    def __init__(self, consumer_factory=None, message_handler=None):
+        self.handler = message_handler
         self.transport = None
 
     def connection_made(self, transport):
