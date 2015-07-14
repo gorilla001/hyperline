@@ -67,9 +67,8 @@ class Register(MessageHandler):
         """
         Send offline msgs to current user
         """
-        if self.transport:
-            for msg in msgs:
-                self.transport.write(pack("!I", len(msg)) + msg)
+        for msg in msgs:
+            self.transport.write(pack("!I", len(msg)) + msg)
 
     @staticmethod
     def get_offline_msg_from_db(user):
