@@ -52,15 +52,13 @@ class Session(object):
     __str__ = __repr__
 
     def register(self, client, transport):
-        # Register client on session
+        """Register client on session"""
         self.clients[client] = transport
-        # try:
-        #     connection = pickle.dumps(connection)
-        # except:
-        #     raise
 
-        #self.redis.set(client, connection)
-
-
+    def unregister(self, client):
+        """Unregister client on session"""
+        if client in self.clients:
+            del self.clients[client]
+            
 if __name__ == '__main__':
     Session()
