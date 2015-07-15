@@ -31,11 +31,6 @@ class MongoProxy(object):
 
         return coll.insert(msg)
 
-    def find(self, invent, **kwargs):
-        coll = self.connection[self.db][invent]
-
-        return coll.find(kwargs)
-
     def get_msgs(self, invent='messages', receiver=None, status=0):
         """
         Get messages from collection.
