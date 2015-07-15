@@ -2,12 +2,16 @@ __author__ = 'nmg'
 
 __all__ = ['MessageHandler']
 
-import asyncio
+_MONGO_HOST = '192.168.99.100'
+_MONGO_PORT = 32768
+_MONGO_DB = 'hyperline'
 
+import asyncio
+import json
 from struct import pack
-from asyncio import Future
 
 from session import Session
+from mongodb import MongoProxy
 
 class MetaHandler(type):
     """Metaclass for MessageHandler"""
@@ -20,6 +24,9 @@ class MetaHandler(type):
 class MessageHandler(metaclass=MetaHandler):
 
     _session = Session()
+    _mongodb = MongoProxy(host=_MONGO_HOST,
+                          port=_MONGO_PORT,
+                          db=_MONGO_DB)
 
     def handle(self, msg, transport):
         try:
@@ -27,7 +34,13 @@ class MessageHandler(metaclass=MetaHandler):
         except KeyError:
             return ErrorHandler().handler(msg)
 
-        return _handler().handler(msg, transport)
+        # Handling messages in a asyncio-Task
+        # Don’t directly create Task instances: use the async() function
+        # or the BaseEventLoop.create_task() method.
+
+        #return _handler().handle(msg, transport)
+
+        return asyncio.async(_handler().handle(msg, transport))
 
 class Register(MessageHandler):
     """
@@ -44,7 +57,8 @@ class Register(MessageHandler):
         self.current_uid = None
         self.transport = None
 
-    def handler(self, msg, transport):
+    @asyncio.coroutine
+    def handle(self, msg, transport):
 
         self.current_uid = msg['uid']
         self.transport = transport
@@ -53,35 +67,28 @@ class Register(MessageHandler):
         self._session.register(self.current_uid, self.transport)
 
         # Get offline msgs from db
-        offline_msgs = self.get_offline_msg(msg)
+        offline_msgs = yield from self.get_offline_msgs()
 
         # Send offline msgs
-        self.send_offline_msgs(offline_msgs)
+        yield from self.send_offline_msgs(offline_msgs)
 
     @asyncio.coroutine
-    def get_offline_msg(self, msg):
+    def get_offline_msgs(self):
+        # Get offline msg from mongodb.
+        return self._mongodb.get_msgs(receiver=self.current_uid)
 
-        # Get offline msg from mongodb. This will be block
-        result = yield from self.get_offline_msg_from_db(self.current_uid)
-
-        return result
-
-    def send_offline_msgs(self, msgs):
+    @asyncio.coroutine
+    def send_offline_msgs(self, offline_msgs):
         """
         Send offline msgs to current user
         """
-        for msg in msgs:
-            msg = msg.decode("utf-8")
-            self.transport.write(pack("!I", len(msg)) + msg)
-
-    @asyncio.coroutine
-    def get_offline_msg_from_db(self, uid):
-        # Get offline msg from mongodb. This must return a `Future`.
-        return [{'type': 'text',
-                 'sender': 'niuminguo',
-                 'receiver': 'niuminguo',
-                 'content': 'hello'
-                }]
+        for msg in offline_msgs:
+            del msg['_id']
+            msg = json.dumps(msg)
+            try:
+                self.transport.write(pack("!I", len(msg)) + bytes(msg, encoding='utf-8'))
+            except Exception:
+                raise
 
 class SendTextMsg(MessageHandler):
     """
@@ -94,7 +101,8 @@ class SendTextMsg(MessageHandler):
     """
     __msgtype__ = 'text'  # Text message
 
-    def handler(self, msg, _):
+    @asyncio.coroutine
+    def handle(self, msg, _):
         """
         Send message to receiver if receiver is online, and
         save message to mongodb. Otherwise save
@@ -102,16 +110,27 @@ class SendTextMsg(MessageHandler):
         :param msg:
         :return: None
         """
-        transport = self._session.get(msg['receiver'], None)
+        transport = self._session.get(msg['receiver'])
         if transport:
             # Pack message as length-prifixed and send to receiver.
             transport.write(pack("!I", len(msg)) + msg)
-            return self.save_message(msg)
 
-        return self.save_message(msg, online=False)
+            return asyncio.async(self.save_message(msg))
 
-    def save_message(self, online=True):
-        pass
+        return asyncio.async(self.save_message(msg, online=False))
+
+    @asyncio.coroutine
+    def save_message(self, msg, online=True):
+        """
+        Save message to mongodb.
+
+        If online is True, message status is 1(True, online), otherwise
+        message status is 0(False, offline).
+        """
+        status = {'status': int(online)}
+        msg.update(status)
+
+        self._mongodb.save_msg('messages', msg)
 
 class Unregister(MessageHandler):
     """
@@ -124,7 +143,7 @@ class Unregister(MessageHandler):
     """
     __msgtype__ = 'unregister'
 
-    def handler(self, msg, transport):
+    def handle(self, msg, transport):
         """Unregister user record from global session"""
         self._session.unregister(msg['uid'])
 
@@ -134,7 +153,7 @@ class ErrorHandler(MessageHandler):
     """
     __msgtype__ = 'unknown'
 
-    def handler(self, msg):
+    def handle(self, msg):
         print("Unknown message type: {}".format(msg))
 
 

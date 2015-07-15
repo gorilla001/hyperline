@@ -37,6 +37,12 @@ class Session(object):
     #     if client in self.clients:
     #         del self.clients[client]
     #
+    def get(self, client):
+        # Get transport associated by client if exists.
+        if client not in self.clients:
+            return None
+        return self.clients[client]
+
     def __contains__(self, client):
         # Decide if client is online
         return client in self.clients

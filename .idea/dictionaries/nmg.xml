@@ -2,11 +2,15 @@
   <dictionary name="nmg">
     <words>
       <w>amqp</w>
+      <w>asyncio</w>
       <w>fanout</w>
       <w>hyperline</w>
       <w>kombu</w>
+      <w>mongo</w>
       <w>msgtype</w>
+      <w>offlinemsgs</w>
       <w>prifixed</w>
+      <w>pymongo</w>
       <w>unregister</w>
     </words>
   </dictionary>
