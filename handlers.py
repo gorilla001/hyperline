@@ -143,7 +143,8 @@ class Unregister(MessageHandler):
     """
     __msgtype__ = 'unregister'
 
-    def handle(self, msg, transport):
+    @asyncio.coroutine
+    def handle(self, msg, _):
         """Unregister user record from global session"""
         self._session.unregister(msg['uid'])
 
@@ -156,5 +157,3 @@ class ErrorHandler(MessageHandler):
     def handle(self, msg):
         print("Unknown message type: {}".format(msg))
 
-
-handler = MessageHandler()
