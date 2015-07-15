@@ -64,3 +64,4 @@ class HyperLineProtocol(asyncio.Protocol):
         :return: None
         """
         raise NotImplementedError()
+
