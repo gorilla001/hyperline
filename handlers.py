@@ -3,7 +3,7 @@ __author__ = 'nmg'
 __all__ = ['MessageHandler']
 
 _MONGO_HOST = '192.168.99.100'
-_MONGO_PORT = 32768
+_MONGO_PORT = 32771
 _MONGO_DB = 'hyperline'
 
 import asyncio
@@ -86,7 +86,14 @@ class Register(MessageHandler):
             del msg['_id']
             msg = json.dumps(msg)
             try:
-                self.transport.write(pack("!I", len(msg)) + bytes(msg, encoding='utf-8'))
+                # Normal Socket use method `write` to send message, while Web Socket use method `send`
+                # For Web Socket, just send raw message
+                if hasattr(self.transport, 'write'):
+                    # Pack message as length-prifixed and send to receiver.
+                    self.transport.write(pack("!I", len(msg)) + bytes(msg, encoding='utf-8'))
+                else:
+                    # Send raw message directly
+                    self.transport.send(msg)
             except Exception:
                 raise
 
@@ -112,10 +119,16 @@ class SendTextMsg(MessageHandler):
         """
         transport = self._session.get(msg['receiver'])
         if transport:
-            # Pack message as length-prifixed and send to receiver.
-            transport.write(pack("!I", len(msg)) + msg)
+                # Normal Socket use method `write` to send message, while Web Socket use method `send`
+                # For Web Socket, just send raw message
+                if hasattr(transport, 'write'):
+                    # Pack message as length-prifixed and send to receiver.
+                    transport.write(pack("!I", len(msg)) + bytes(msg, encoding='utf-8'))
+                else:
+                    # Send raw message directly
+                    yield from transport.send(json.dumps(msg))
 
-            return asyncio.async(self.save_message(msg))
+                return asyncio.async(self.save_message(msg))
 
         return asyncio.async(self.save_message(msg, online=False))
 
@@ -130,7 +143,7 @@ class SendTextMsg(MessageHandler):
         status = {'status': int(online)}
         msg.update(status)
 
-        self._mongodb.save_msg('messages', msg)
+        self._mongodb.save_msg(msg)
 
 class Unregister(MessageHandler):
     """

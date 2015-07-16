@@ -65,3 +65,37 @@ class HyperLineProtocol(asyncio.Protocol):
         """
         raise NotImplementedError()
 
+
+class WSProtocol(object):
+
+    @asyncio.coroutine
+    def __call__(self, ws, path):
+
+        yield from self.connection_made(ws)
+
+        while True:
+            message = yield from ws.recv()
+
+            if message is None:
+                yield from self.connection_lost()
+                break
+
+            yield from self.message_received(message)
+
+    @asyncio.coroutine
+    def consumer(self, message):
+        print("< {}".format(message))
+
+    @asyncio.coroutine
+    def connection_made(self, ws):
+
+        raise NotImplementedError()
+
+    @asyncio.coroutine
+    def message_received(self, message):
+
+        raise NotImplementedError()
+
+    @asyncio.coroutine
+    def connection_lost(self):
+        print('connection lost')

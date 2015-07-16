@@ -26,7 +26,6 @@ class MongoProxy(object):
 
         @return: a WriteResult object that contains the status of the operation(not used currently)
         """
-
         coll = self.connection[self.db][coll]
 
         return coll.insert(msg)
