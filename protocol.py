@@ -2,9 +2,13 @@ __author__ = 'nmg'
 
 import asyncio
 
+import logging
+
 _MESSAGE_PREFIX_LENGTH = 4
 
 _BYTE_ORDER = 'big'
+
+logger = logging.getLogger(__name__)
 
 class HyperLineProtocol(asyncio.Protocol):
     """
@@ -119,4 +123,4 @@ class WSProtocol(object):
         Must override in subclass
         @return: None
         """
-        print('connection lost')
+        logger.info('connection lost')

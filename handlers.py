@@ -9,9 +9,12 @@ _MONGO_DB = 'hyperline'
 import asyncio
 import json
 from struct import pack
+import logging
 
 from session import Session
 from mongodb import MongoProxy
+
+logger = logging.getLogger(__name__)
 
 class MetaHandler(type):
     """Metaclass for MessageHandler"""
@@ -168,5 +171,5 @@ class ErrorHandler(MessageHandler):
     __msgtype__ = 'unknown'
 
     def handle(self, msg):
-        print("Unknown message type: {}".format(msg))
+        logger.info("Unknown message type: {}".format(msg))
 

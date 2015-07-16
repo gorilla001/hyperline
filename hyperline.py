@@ -5,10 +5,14 @@ import json
 import websockets
 import ast
 import six
+import logging
 
 from protocol import HyperLineProtocol
 from protocol import WSProtocol
 from handlers import MessageHandler
+
+
+logger = logging.getLogger(__name__)
 
 class HyperLine(HyperLineProtocol):
 
@@ -25,8 +29,8 @@ class HyperLine(HyperLineProtocol):
     def message_received(self, msg):
         """
         The real message handler
-        :param msg: a full message without prefix length
-        :return: None
+        @param msg: a full message without prefix length
+        @return: None
         """
         # Convert bytes msg to python dictionary
         msg = json.loads(msg.decode("utf-8"))
@@ -45,6 +49,8 @@ class WSHyperLine(WSProtocol):
 
     @asyncio.coroutine
     def connection_made(self, ws):
+        logger.info('new connection made')
+
         self.transport = ws
 
     @asyncio.coroutine
@@ -60,22 +66,20 @@ class WSHyperLine(WSProtocol):
 
 
 class HyperLineServer(object):
-    def __init__(self, protocol_factory, host, port):
+    def __init__(self, protocol_factory, host, port, ws_host, ws_port):
 
         self.host = host
         self.port = port
+        self.ws_host = ws_host
+        self.ws_port = ws_port
         self.protocol_factory = protocol_factory
 
     def start(self):
         loop = asyncio.get_event_loop()
-        print('Socket server listened on {}:{}'.format(self.host, self.port))
+        logger.info('Socket server listened on {}:{}'.format(self.host, self.port))
         loop.run_until_complete(loop.create_server(self.protocol_factory, self.host, self.port))
-        print('Websocket server listened on {}:{}'.format(self.host, '9000'))
-        loop.run_until_complete(websockets.serve(WSHyperLine(), self.host, 9000))
+        logger.info('Websocket server listened on {}:{}'.format(self.ws_host, self.ws_port))
+        loop.run_until_complete(websockets.serve(WSHyperLine(), self.ws_host, self.ws_port))
 
         loop.run_forever()
 
-if __name__ == '__main__':
-
-    server = HyperLineServer(HyperLine, 'localhost', 2222)
-    server.start()

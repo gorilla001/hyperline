@@ -2,17 +2,21 @@
   <dictionary name="nmg">
     <words>
       <w>amqp</w>
+      <w>asctime</w>
       <w>asyncio</w>
       <w>coroutine</w>
       <w>fanout</w>
       <w>hyperline</w>
       <w>kombu</w>
+      <w>levelname</w>
       <w>mongo</w>
       <w>msgtype</w>
       <w>offlinemsgs</w>
+      <w>pfactory</w>
       <w>prifixed</w>
       <w>pymongo</w>
       <w>recv</w>
+      <w>tfactory</w>
       <w>unregister</w>
       <w>websocket</w>
       <w>websockets</w>
