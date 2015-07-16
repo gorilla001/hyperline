@@ -3,6 +3,7 @@
     <words>
       <w>amqp</w>
       <w>asyncio</w>
+      <w>coroutine</w>
       <w>fanout</w>
       <w>hyperline</w>
       <w>kombu</w>
@@ -11,7 +12,10 @@
       <w>offlinemsgs</w>
       <w>prifixed</w>
       <w>pymongo</w>
+      <w>recv</w>
       <w>unregister</w>
+      <w>websocket</w>
+      <w>websockets</w>
     </words>
   </dictionary>
 </component>

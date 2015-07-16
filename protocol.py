@@ -7,6 +7,9 @@ _MESSAGE_PREFIX_LENGTH = 4
 _BYTE_ORDER = 'big'
 
 class HyperLineProtocol(asyncio.Protocol):
+    """
+    Normal socket protocol. Handling stream data.
+    """
 
     _buffer = b''     # data buffer
     _msg_len = None   # message length
@@ -67,35 +70,53 @@ class HyperLineProtocol(asyncio.Protocol):
 
 
 class WSProtocol(object):
+    """
+    Web socket protocol. Handling message data.
 
+    The `ws.recv` method always recv entire message. If recv None, indicated that
+    the connection is lost.
+
+    Method `__call__` must accept two arguments, one is a `websockets.WebSocketServerProtocol` and
+    the other is request URI.(ignored in this place)
+    """
     @asyncio.coroutine
-    def __call__(self, ws, path):
+    def __call__(self, ws, _):
 
         yield from self.connection_made(ws)
 
         while True:
+            # Recv message from websocket
             message = yield from ws.recv()
 
             if message is None:
+                # When None received, seems connection has lost. close it and break the loop.
                 yield from self.connection_lost()
                 break
-
+            # Consuming message in a coroutine.
             yield from self.message_received(message)
 
     @asyncio.coroutine
-    def consumer(self, message):
-        print("< {}".format(message))
-
-    @asyncio.coroutine
     def connection_made(self, ws):
-
+        """
+        Must override in subclass
+        @param ws: `websockets.WebSocketServerProtocol`
+        @return: None
+        """
         raise NotImplementedError()
 
     @asyncio.coroutine
     def message_received(self, message):
-
+        """
+        Must override in subclass
+        @param message: entire message
+        @return: None
+        """
         raise NotImplementedError()
 
     @asyncio.coroutine
     def connection_lost(self):
+        """
+        Must override in subclass
+        @return: None
+        """
         print('connection lost')
