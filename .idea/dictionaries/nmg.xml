@@ -17,6 +17,7 @@
       <w>pymongo</w>
       <w>recv</w>
       <w>tfactory</w>
+      <w>timeouted</w>
       <w>unregister</w>
       <w>websocket</w>
       <w>websockets</w>

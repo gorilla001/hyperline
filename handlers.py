@@ -76,7 +76,7 @@ class Register(MessageHandler):
 
         # Register user in global session
         self._session.register(self.current_uid,
-                               Session(self.transport))
+                               Session(self.current_uid, self.transport))
         print(self._session)
 
         # Get offline msgs from db
