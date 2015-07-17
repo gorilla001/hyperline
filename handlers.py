@@ -64,7 +64,7 @@ class Register(MessageHandler):
         try:
             self.current_uid = msg['uid']
         except KeyError:
-            logger.error("Message format is not correct")
+            logger.error("Message format is not correct: message uid must be specified")
             return
 
         self.transport = transport
@@ -123,7 +123,12 @@ class SendTextMsg(MessageHandler):
         :param msg:
         :return: None
         """
-        transport = self._session.get(msg['receiver'])
+        try:
+            transport = self._session.get(msg['receiver'])
+        except KeyError:
+            logger.error("Message format is not correct: message receiver must be specified")
+            return
+
         if transport:
                 # Normal Socket use method `write` to send message, while Web Socket use method `send`
                 # For Web Socket, just send raw message
