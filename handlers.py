@@ -1,5 +1,8 @@
 __author__ = 'nmg'
 
+from decorator import singleton
+from meta import MetaHandler
+
 __all__ = ['MessageHandler']
 
 _MONGO_HOST = '192.168.99.100'
@@ -16,16 +19,17 @@ from mongodb import MongoProxy
 
 logger = logging.getLogger(__name__)
 
-class MetaHandler(type):
-    """Metaclass for MessageHandler"""
-    def __init__(cls, name, bases, dict):
-        try:
-            cls._msg_handlers[cls.__msgtype__] = cls
-        except AttributeError:
-            cls._msg_handlers = {}
 
 class MessageHandler(metaclass=MetaHandler):
 
+    """
+    Variables `_session` and `_mongodb` are all class variable. This ensure
+    that only one copy between instances that were instantiated from `MessageHandler`
+    for many times. These variables are shared between these instances.
+
+    The points is that the class variables are shared between instances. so don't worried
+    for different session and mongodb.
+    """
     _session = Session()
     _mongodb = MongoProxy(host=_MONGO_HOST,
                           port=_MONGO_PORT,
@@ -35,7 +39,7 @@ class MessageHandler(metaclass=MetaHandler):
         try:
             _handler = self._msg_handlers[msg['type']]
         except KeyError:
-            return ErrorHandler().handler(msg)
+            return ErrorHandler().handle(msg)
 
         # Handling messages in a asyncio-Task
         # Don’t directly create Task instances: use the async() function
