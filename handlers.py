@@ -61,7 +61,12 @@ class Register(MessageHandler):
     @asyncio.coroutine
     def handle(self, msg, transport):
 
-        self.current_uid = msg['uid']
+        try:
+            self.current_uid = msg['uid']
+        except KeyError:
+            logger.error("Message format is not correct")
+            return
+
         self.transport = transport
 
         # Register user in global session
