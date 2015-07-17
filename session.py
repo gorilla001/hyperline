@@ -2,63 +2,74 @@ __author__ = 'nmg'
 
 __all__ = ['Session']
 
-class Session(object):
+import asyncio
 
-    # _instance = None
-    #
-    # def __new__(cls, *args, **kwargs):
-    #     if cls._instance is None:
-    #         cls._instance = object.__new__(cls, *args, **kwargs)
-    #
-    #     return cls._instance
-
+class SessionManager(object):
+    """
+    Manage session objects
+    """
     def __init__(self):
-        # self.redis = redis.StrictRedis(host='192.168.99.100', port=32768, db=0)
-        # #self.sessions = Manager().dict()
-        # try:
-        #     self.clients = self.clients.deepcopy()
-        # except AttributeError:
-        #     self.clients = {}
-        self.clients = {}
+        self.sessions = {}
 
-    # def __setitem__(self, client, transport):
-    #     # Add client-transport pairs
-    #     if client not in self.clients:
-    #         self.clients[client] = transport
-    #
-    # def __getitem__(self, client):
-    #     # Get transport associated by client if exists.
-    #     if client not in self.clients:
-    #         return None
-    #     return self.clients[client]
-    #
-    # def __delitem__(self, client):
-    #     # Delete client-transport pairs
-    #     if client in self.clients:
-    #         del self.clients[client]
-    #
-    def get(self, client):
-        # Get transport associated by client if exists.
-        if client not in self.clients:
-            return None
-        return self.clients[client]
-
-    def __contains__(self, client):
-        # Decide if client is online
-        return client in self.clients
-
-    def __repr__(self):
-        return "{}".format(self.clients)
-    __str__ = __repr__
-
-    def register(self, client, transport):
-        """Register client on session"""
-        self.clients[client] = transport
+    def register(self, client, session):
+        self.sessions[client] = session
 
     def unregister(self, client):
-        """Unregister client on session"""
-        if client in self.clients:
-            del self.clients[client]
+        del self.sessions[client]
+
+    def get(self, client):
+        # Get transport associated by client if exists.
+        if client not in self.sessions:
+            return None
+
+        return self.sessions[client].transport
+
+    def expire(self):
+        pass
+
+    def __repr__(self):
+        return "{}".format(self.sessions)
+
+    __str__ = __repr__
+
+class Session(object):
+    """
+    Session object is used for managing connection(transport). After `timeout` seconds, and
+    has no `touch` called, the connection will be closed.
+    """
+
+    def __init__(self, transport, timeout=5):
+        self.transport = transport
+        self.timeout = timeout
+        self._loop = asyncio.get_event_loop()
+        self._timeout_handler = None
+        self.add_timeout()
+
+    def add_timeout(self):
+        self._timeout_handler = self._loop.call_later(self.timeout, self.close_connection)
+
+    def close_connection(self):
+        print('timeout closed')
+        asyncio.async(self.transport.close())
+
+    def cancel_timeout(self):
+        """
+        Cancel timeout handler. So the close_connection action will not be acted.
+        """
+        self._timeout_handler.cancel()
+        self._timeout_handler = None
+
+    def touch(self):
+        """
+        Cancel timeout handler and re-add handler. The client will call `touch` for
+        next timeout.
+
+        Every `heartbeat` message received or every `chat` message received, the session
+        will be touched.
+        """
+        self.cancel_timeout()
+        self.add_timeout()
+
 
 if __name__ == '__main__':
     Session()

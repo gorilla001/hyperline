@@ -15,6 +15,7 @@ from struct import pack
 import logging
 
 from session import Session
+from session import SessionManager
 from mongodb import MongoProxy
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ class MessageHandler(metaclass=MetaHandler):
     The points is that the class variables are shared between instances. so don't worried
     for different session and mongodb.
     """
-    _session = Session()
+    _session = SessionManager()
     _mongodb = MongoProxy(host=_MONGO_HOST,
                           port=_MONGO_PORT,
                           db=_MONGO_DB)
@@ -74,7 +75,9 @@ class Register(MessageHandler):
         self.transport = transport
 
         # Register user in global session
-        self._session.register(self.current_uid, self.transport)
+        self._session.register(self.current_uid,
+                               Session(self.transport))
+        print(self._session)
 
         # Get offline msgs from db
         offline_msgs = yield from self.get_offline_msgs()
@@ -176,6 +179,14 @@ class Unregister(MessageHandler):
         """Unregister user record from global session"""
         self._session.unregister(msg['uid'])
 
+class HeartBeat(MessageHandler):
+    """
+    Handling heartbeat message from client
+
+    Message body should like this:
+
+        {'type': 'heartbeat', 'uid': 'unique-user-id'}
+    """
 class ErrorHandler(MessageHandler):
     """
     Unknown message type
