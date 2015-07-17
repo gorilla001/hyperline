@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class MetaHandler(type):
     """Metaclass for MessageHandler"""
-    def __init__(cls, name, bases, _dict):
+    def __init__(cls, name, bases, dict):
         try:
             cls._msg_handlers[cls.__msgtype__] = cls
         except AttributeError:
@@ -40,8 +40,6 @@ class MessageHandler(metaclass=MetaHandler):
         # Handling messages in a asyncio-Task
         # Don’t directly create Task instances: use the async() function
         # or the BaseEventLoop.create_task() method.
-
-        #return _handler().handle(msg, transport)
 
         return asyncio.async(_handler().handle(msg, transport))
 

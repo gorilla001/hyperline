@@ -46,13 +46,3 @@ class MongoProxy(object):
             return coll.find({'status': 0})
 
         return coll.find({"$and": [{'receiver': receiver}, {'status': status}]})
-
-
-
-if __name__ == '__main__':
-    client = MongoProxy('192.168.99.100', 32769, 'hyperline')
-    db = client.connection['hyperline']
-    inventory = db['messages']
-    cursor = inventory.find({"$and": [{'receiver': 'niuminguo'}, {'status': 0}]})
-    for doc in cursor:
-        print(doc)
