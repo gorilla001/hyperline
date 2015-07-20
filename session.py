@@ -3,7 +3,6 @@ __author__ = 'nmg'
 __all__ = ['Session']
 
 import asyncio
-from decorator import singleton
 import functools
 
 # class Timer(object):
@@ -24,7 +23,6 @@ import functools
 #     def cancel(self):
 #         self._timeout_handler.cancel()
 #         self._timeout_handler = None
-@singleton
 class SessionManager(object):
     """
     Manage session objects.
