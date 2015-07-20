@@ -72,6 +72,16 @@ class HyperLineProtocol(asyncio.Protocol):
         """
         raise NotImplementedError()
 
+import websockets
+
+class Connection(websockets.server.WebSocketServerProtocol):
+
+    def add_timeout(self):
+        pass
+
+    def cancel_timeout(self):
+        pass
+
 
 class WSProtocol(object):
     """
@@ -85,7 +95,6 @@ class WSProtocol(object):
     """
     @asyncio.coroutine
     def __call__(self, ws, _):
-        print(ws)
         yield from self.connection_made(ws)
 
         while True:

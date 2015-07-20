@@ -16,7 +16,6 @@ from mongodb import MongoProxy
 
 logger = logging.getLogger(__name__)
 
-
 class MessageHandler(metaclass=MetaHandler):
 
     """

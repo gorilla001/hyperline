@@ -15,10 +15,15 @@ from handlers import MessageHandler
 logger = logging.getLogger(__name__)
 
 class HyperLine(HyperLineProtocol):
+    """
+    Every new clients connection will create one HyperLine object for message handling.
+
+        new connection -> HyperLine()
+    """
 
     def __init__(self):
 
-        self.handler = MessageHandler()
+        self.handler = MessageHandler()  # singleton
 
         self.transport = None
 
@@ -43,7 +48,7 @@ class WSHyperLine(WSProtocol):
 
     def __init__(self):
 
-        self.handler = MessageHandler()
+        self.handler = MessageHandler()  # singleton
 
         self.transport = None
 
