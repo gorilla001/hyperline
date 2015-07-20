@@ -40,7 +40,7 @@ class SessionManager(object):
     . handler session expired
 
     """
-    def __init__(self, timeout=5):
+    def __init__(self, timeout=1800):
         # sessions contains client-connection pairs.
         self.sessions = {}
 

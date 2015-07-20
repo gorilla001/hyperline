@@ -132,7 +132,7 @@ class SendTextMsg(MessageHandler):
             logger.error("Message format is not correct: message receiver must be specified")
             return
 
-        if transport:
+        if session:
                 # Normal Socket use method `write` to send message, while Web Socket use method `send`
                 # For Web Socket, just send raw message
                 if hasattr(session.transport, 'write'):
