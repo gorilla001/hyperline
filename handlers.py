@@ -5,10 +5,6 @@ from meta import MetaHandler
 
 __all__ = ['MessageHandler']
 
-_MONGO_HOST = '192.168.99.100'
-_MONGO_PORT = 32771
-_MONGO_DB = 'hyperline'
-
 import asyncio
 import json
 from struct import pack
@@ -32,9 +28,7 @@ class MessageHandler(metaclass=MetaHandler):
     for different session and mongodb.
     """
     _session_manager = SessionManager()
-    _mongodb = MongoProxy(host=_MONGO_HOST,
-                          port=_MONGO_PORT,
-                          db=_MONGO_DB)
+    _mongodb = MongoProxy()
 
     def handle(self, msg, transport):
         try:
@@ -75,8 +69,7 @@ class Register(MessageHandler):
         self.transport = transport
 
         # Register user in global session
-        self._session_manager.add_session(self.current_uid,
-                                  Session(self.transport))
+        self._session_manager.add_session(self.current_uid, Session(self.transport))
 
         # Start session timer
 
@@ -134,7 +127,7 @@ class SendTextMsg(MessageHandler):
         :return: None
         """
         try:
-            transport = self._session_manager.get_session(msg['receiver'])
+            session = self._session_manager.get_session(msg['receiver'])
         except KeyError:
             logger.error("Message format is not correct: message receiver must be specified")
             return
@@ -142,12 +135,12 @@ class SendTextMsg(MessageHandler):
         if transport:
                 # Normal Socket use method `write` to send message, while Web Socket use method `send`
                 # For Web Socket, just send raw message
-                if hasattr(transport, 'write'):
+                if hasattr(session.transport, 'write'):
                     # Pack message as length-prifixed and send to receiver.
-                    transport.write(pack("!I", len(msg)) + bytes(msg, encoding='utf-8'))
+                    session.transport.write(pack("!I", len(msg)) + bytes(msg, encoding='utf-8'))
                 else:
                     # Send raw message directly
-                    yield from transport.send(json.dumps(msg))
+                    yield from session.transport.send(json.dumps(msg))
 
                 return asyncio.async(self.save_message(msg))
 

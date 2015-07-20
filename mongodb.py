@@ -5,11 +5,15 @@ __all__ = ['MongoProxy']
 
 from pymongo import MongoClient
 
+_MONGO_HOST = '192.168.99.100'
+_MONGO_PORT = 32771
+_MONGO_DB = 'hyperline'
+
 class MongoProxy(object):
-    def __init__(self, host, port, db):
-        self.host = host
-        self.port = port
-        self.db = db
+    def __init__(self):
+        self.host = _MONGO_HOST
+        self.port = _MONGO_PORT
+        self.db = _MONGO_DB
         self.connection = None
 
         self.connect()
