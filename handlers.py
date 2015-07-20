@@ -75,9 +75,12 @@ class Register(MessageHandler):
         self.transport = transport
 
         # Register user in global session
-        self._session.register(self.current_uid,
-                               Session(self.current_uid, self.transport))
-        print(self._session)
+        self._session.add_session(self.current_uid,
+                                  Session(self.transport))
+
+        # Start session timer
+
+        self._session.add_timeout(self.current_uid)
 
         # Get offline msgs from db
         offline_msgs = yield from self.get_offline_msgs()
@@ -127,7 +130,7 @@ class SendTextMsg(MessageHandler):
         Send message to receiver if receiver is online, and
         save message to mongodb. Otherwise save
         message to mongodb as offline message.
-        :param msg:
+        :param msg: message to send
         :return: None
         """
         try:
@@ -187,6 +190,12 @@ class HeartBeat(MessageHandler):
 
         {'type': 'heartbeat', 'uid': 'unique-user-id'}
     """
+    __msgtype__ = 'heartbeat'
+
+    @asyncio.coroutine
+    def handle(self, msg, _):
+        self._session.get(msg['uid']).touch()
+
 class ErrorHandler(MessageHandler):
     """
     Unknown message type
