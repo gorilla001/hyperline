@@ -31,7 +31,7 @@ class MessageHandler(metaclass=MetaHandler):
     The points is that the class variables are shared between instances. so don't worried
     for different session and mongodb.
     """
-    _session = SessionManager()
+    _session_manager = SessionManager()
     _mongodb = MongoProxy(host=_MONGO_HOST,
                           port=_MONGO_PORT,
                           db=_MONGO_DB)
@@ -75,12 +75,12 @@ class Register(MessageHandler):
         self.transport = transport
 
         # Register user in global session
-        self._session.add_session(self.current_uid,
+        self._session_manager.add_session(self.current_uid,
                                   Session(self.transport))
 
         # Start session timer
 
-        self._session.add_timeout(self.current_uid)
+        self._session_manager.add_timeout(self.current_uid)
 
         # Get offline msgs from db
         offline_msgs = yield from self.get_offline_msgs()
@@ -134,7 +134,7 @@ class SendTextMsg(MessageHandler):
         :return: None
         """
         try:
-            transport = self._session.get(msg['receiver'])
+            transport = self._session_manager.get_session(msg['receiver'])
         except KeyError:
             logger.error("Message format is not correct: message receiver must be specified")
             return
@@ -180,7 +180,7 @@ class Unregister(MessageHandler):
     @asyncio.coroutine
     def handle(self, msg, _):
         """Unregister user record from global session"""
-        self._session.unregister(msg['uid'])
+        self._session_manager.pop_session(msg['uid'])
 
 class HeartBeat(MessageHandler):
     """
@@ -194,7 +194,7 @@ class HeartBeat(MessageHandler):
 
     @asyncio.coroutine
     def handle(self, msg, _):
-        self._session.get(msg['uid']).touch()
+        self._session_manager.touch(msg['uid'])
 
 class ErrorHandler(MessageHandler):
     """
