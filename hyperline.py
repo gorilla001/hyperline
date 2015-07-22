@@ -52,19 +52,19 @@ class WSHyperLine(WSProtocol):
 
         self.handler = MessageHandler()  # singleton
         self.session_manager = SessionManager()  # singleton
-        self.session = None
 
     @asyncio.coroutine
-    def connection_made(self, ws):
+    def connection_made(self, connection):
+        # """
+        # Every connection will create one new Session
+        # """
         """
-        Every connection will create one new Session
+        Populated session attribute `transport` with `ws` from connection
         """
-        self.session = Session()
-
-        self.session.transport = ws
+        connection.session.transport = connection.ws
 
     @asyncio.coroutine
-    def message_received(self, message):
+    def message_received(self, message, connection):
 
         if isinstance(message, six.text_type):
             message = ast.literal_eval(message)
@@ -72,12 +72,14 @@ class WSHyperLine(WSProtocol):
         if isinstance(message, six.binary_type):
             message = json.loads(message.decode("utf-8"))
 
-        return self.handler.handle(message, self.session)
+        return self.handler.handle(message, connection.session)
 
     @asyncio.coroutine
-    def connection_lost(self):
-        """Delete session from SessionManager"""
-        self.session_manager.pop_session(self.session.client)
+    def connection_lost(self, connection):
+        """Close connection and delete session from SessionManager"""
+        yield from connection.ws.close()
+
+        self.session_manager.pop_session(connection.session.client)
 
 
 class HyperLineServer(object):

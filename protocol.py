@@ -4,11 +4,14 @@ import asyncio
 
 import logging
 
+from session import Session
+
 _MESSAGE_PREFIX_LENGTH = 4
 
 _BYTE_ORDER = 'big'
 
 logger = logging.getLogger(__name__)
+
 
 class HyperLineProtocol(asyncio.Protocol):
     """
@@ -74,14 +77,10 @@ class HyperLineProtocol(asyncio.Protocol):
 
 import websockets
 
-class Connection(websockets.server.WebSocketServerProtocol):
-
-    def add_timeout(self):
-        pass
-
-    def cancel_timeout(self):
-        pass
-
+class Connection(object):
+    def __init__(self, ws, session):
+        self.ws = ws
+        self.session = session
 
 class WSProtocol(object):
     """
@@ -95,7 +94,10 @@ class WSProtocol(object):
     """
     @asyncio.coroutine
     def __call__(self, ws, _):
-        yield from self.connection_made(ws)
+
+        connection = Connection(ws, Session())
+
+        yield from self.connection_made(connection)
 
         while True:
             # Recv message from websocket
@@ -103,13 +105,13 @@ class WSProtocol(object):
 
             if message is None:
                 # When None received, seems connection has lost. close it and break the loop.
-                yield from self.connection_lost()
+                yield from self.connection_lost(connection)
                 break
             # Consuming message in a coroutine.
-            yield from self.message_received(message)
+            yield from self.message_received(message, connection)
 
     @asyncio.coroutine
-    def connection_made(self, ws):
+    def connection_made(self, connection):
         """
         Must override in subclass
         @param ws: `websockets.WebSocketServerProtocol`
@@ -118,7 +120,7 @@ class WSProtocol(object):
         raise NotImplementedError()
 
     @asyncio.coroutine
-    def message_received(self, message):
+    def message_received(self, message, connection):
         """
         Must override in subclass
         @param message: entire message
@@ -127,7 +129,7 @@ class WSProtocol(object):
         raise NotImplementedError()
 
     @asyncio.coroutine
-    def connection_lost(self):
+    def connection_lost(self, connection):
         """
         Must override in subclass
         @return: None
