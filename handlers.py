@@ -10,7 +10,6 @@ import json
 from struct import pack
 import logging
 
-from session import Session
 from session import SessionManager
 from mongodb import MongoProxy
 

@@ -11,8 +11,6 @@ from protocol import HyperLineProtocol
 from protocol import WSProtocol
 from handlers import MessageHandler
 from session import SessionManager
-from session import Session
-
 
 logger = logging.getLogger(__name__)
 
