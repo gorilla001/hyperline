@@ -125,9 +125,9 @@ class Session(object):
     has no `touch` called, the connection will be closed.
     """
 
-    def __init__(self, transport):
-        # self.client = client
-        self.transport = transport
+    def __init__(self):
+        self.client = None
+        self.transport = None
         # self.timeout = timeout
         # self._loop = asyncio.get_event_loop()
         self._timeout_handler = None

@@ -29,7 +29,7 @@ class MessageHandler(metaclass=MetaHandler):
     _session_manager = SessionManager()
     _mongodb = MongoProxy()
 
-    def handle(self, msg, transport):
+    def handle(self, msg, session):
         try:
             _handler = self._msg_handlers[msg['type']]
         except KeyError:
@@ -39,7 +39,7 @@ class MessageHandler(metaclass=MetaHandler):
         # Don’t directly create Task instances: use the async() function
         # or the BaseEventLoop.create_task() method.
 
-        return asyncio.async(_handler().handle(msg, transport))
+        return asyncio.async(_handler().handle(msg, session))
 
 class Register(MessageHandler):
     """
@@ -57,7 +57,7 @@ class Register(MessageHandler):
         self.transport = None
 
     @asyncio.coroutine
-    def handle(self, msg, transport):
+    def handle(self, msg, session):
 
         try:
             self.current_uid = msg['uid']
@@ -65,10 +65,11 @@ class Register(MessageHandler):
             logger.error("Message format is not correct: message uid must be specified")
             return
 
-        self.transport = transport
+        session.client = self.current_uid
+        self.transport = session.transport
 
         # Register user in global session
-        self._session_manager.add_session(self.current_uid, Session(self.transport))
+        self._session_manager.add_session(self.current_uid, session)
 
         # Start session timer
 

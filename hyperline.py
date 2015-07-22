@@ -11,6 +11,7 @@ from protocol import HyperLineProtocol
 from protocol import WSProtocol
 from handlers import MessageHandler
 from session import SessionManager
+from session import Session
 
 
 logger = logging.getLogger(__name__)
@@ -50,17 +51,14 @@ class WSHyperLine(WSProtocol):
     def __init__(self):
 
         self.handler = MessageHandler()  # singleton
-        self.session_manager = SessionManager()
-
-        self.transport = None
+        self.session_manager = SessionManager()  # singleton
+        self.session = Session()
 
     @asyncio.coroutine
     def connection_made(self, ws):
         print('new connection made')
 
-        self.transport = ws
-
-        yield from self.transport.send('你们系统出问题了吗')
+        self.session.transport = ws
 
     @asyncio.coroutine
     def message_received(self, message):
@@ -71,11 +69,12 @@ class WSHyperLine(WSProtocol):
         if isinstance(message, six.binary_type):
             message = json.loads(message.decode("utf-8"))
 
-        return self.handler.handle(message, self.transport)
+        return self.handler.handle(message, self.session)
 
     @asyncio.coroutine
     def connection_lost(self):
-        print('connection lost')
+        """Delete session from SessionManager"""
+        self.session_manager.pop_session(self.session.client)
 
 
 class HyperLineServer(object):
