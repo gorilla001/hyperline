@@ -34,10 +34,12 @@ class SlowSquareClientProtocol(WebSocketClientProtocol):
         message = {'type': 'register', 'uid': 'client-1'}
         self.sendMessage(json.dumps(message).encode('utf8'))
 
-        # while True:
-        #     data = input(">")
-        #     message = {'type': 'text', 'sender': 'client-1', 'receiver': 'client-2', 'content': data}
-        #     self.sendMessage(json.dumps(message).encode('utf8'))
+        print('connected')
+
+        while True:
+            data = input(">")
+            message = {'type': 'text', 'sender': 'client-1', 'receiver': 'zhangsan', 'content': data}
+            self.sendMessage(json.dumps(message).encode('utf8'))
 
     def onMessage(self, payload, isBinary):
 
@@ -45,8 +47,11 @@ class SlowSquareClientProtocol(WebSocketClientProtocol):
         #     res = json.loads(payload.decode('utf8'))
         #     print("< {}".format(res))
         #     self.sendClose()
-        res = json.loads(payload.decode('utf8'))
-        print('< {}'.format(res['content']))
+        #res = json.loads(payload.decode('utf8'))
+        #print(res)
+        print(payload)
+
+        #print('< {}'.format(res['content']))
 
         data = input(">")
         message = {'type': 'text', 'sender': 'client-1', 'receiver': 'client-2', 'content': data}

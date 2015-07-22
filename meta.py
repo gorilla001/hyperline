@@ -17,3 +17,13 @@ class MetaHandler(type):
             cls._msg_handlers[cls.__msgtype__] = cls
         except AttributeError:
             cls._msg_handlers = {}
+
+
+class MetaSession(type):
+    """Metaclass for SessionManager"""
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(MetaSession, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]

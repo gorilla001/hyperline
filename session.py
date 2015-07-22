@@ -4,6 +4,7 @@ __all__ = ['Session']
 
 import asyncio
 import functools
+from meta import MetaSession
 
 # class Timer(object):
 #     """
@@ -23,7 +24,7 @@ import functools
 #     def cancel(self):
 #         self._timeout_handler.cancel()
 #         self._timeout_handler = None
-class SessionManager(object):
+class SessionManager(metaclass=MetaSession):
     """
     Manage session objects.
 
