@@ -52,11 +52,14 @@ class WSHyperLine(WSProtocol):
 
         self.handler = MessageHandler()  # singleton
         self.session_manager = SessionManager()  # singleton
-        self.session = Session()
+        self.session = None
 
     @asyncio.coroutine
     def connection_made(self, ws):
-        print('new connection made')
+        """
+        Every connection will create one new Session
+        """
+        self.session = Session()
 
         self.session.transport = ws
 
