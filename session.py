@@ -70,45 +70,45 @@ class SessionManager(metaclass=MetaSession):
 
         return self.sessions.get(client)
 
-    def add_timeout(self, client):
-        """
-        Add timeout for session associated by client.
-        """
-        session = self.get_session(client)
-        session._timeout_handler = self._loop.call_later(
-            self.timeout, functools.partial(self.timeout_handler, client))
+    # def add_timeout(self, client):
+    #     """
+    #     Add timeout for session associated by client.
+    #     """
+    #     session = self.get_session(client)
+    #     session._timeout_handler = self._loop.call_later(
+    #         self.timeout, functools.partial(self.timeout_handler, client))
 
-    def cancel_timeout(self, client):
-        """
-        Cancel timeout for session associated by client.
-        """
-        session = self.get_session(client)
-        session._timeout_handler.cancel()
-        session._timeout_handler = None
+    # def cancel_timeout(self, client):
+    #     """
+    #     Cancel timeout for session associated by client.
+    #     """
+    #     session = self.get_session(client)
+    #     session._timeout_handler.cancel()
+    #     session._timeout_handler = None
+    #
+    # def touch(self, client):
+    #     """
+    #     Cancel timeout handler and re-add handler. The client will call `touch` for
+    #     next timeout.
+    #
+    #     Every `heartbeat` message received or every `chat` message received, the session
+    #     will be touched.
+    #     """
+    #     self.cancel_timeout(client)
+    #     self.add_timeout(client)
+    #
+    # def timeout_handler(self, client):
+    #     # Close connection
+    #     self.get_session(client).close()
+    #
+    #     # Delete self from SessionManager
+    #     self.explode(client)
 
-    def touch(self, client):
-        """
-        Cancel timeout handler and re-add handler. The client will call `touch` for
-        next timeout.
-
-        Every `heartbeat` message received or every `chat` message received, the session
-        will be touched.
-        """
-        self.cancel_timeout(client)
-        self.add_timeout(client)
-
-    def timeout_handler(self, client):
-        # Close connection
-        self.get_session(client).close()
-
-        # Delete self from SessionManager
-        self.explode(client)
-
-    def explode(self, client):
-        """
-        Delete session from SessionManager
-        """
-        self.pop_session(client)
+    # def explode(self, client):
+    #     """
+    #     Delete session from SessionManager
+    #     """
+    #     self.pop_session(client)
 
     def check_expire(self):
         print(self.sessions)
@@ -125,49 +125,47 @@ class Session(object):
     has no `touch` called, the connection will be closed.
     """
 
-    def __init__(self):
+    def __init__(self, timeout=1800):
         self.client = None
         self.transport = None
-        # self.timeout = timeout
-        # self._loop = asyncio.get_event_loop()
+        self.timeout = timeout
+        self._loop = asyncio.get_event_loop()
         self._timeout_handler = None
-        # self.timeout_handler = None
-        # self.manager = SessionManager()
-        # self.add_timeout()
+        self.manager = SessionManager()
 
-    # def add_timeout(self):
-    #     self._timeout_handler = self._loop.call_later(self.timeout, self.timeout_handler)
-    #
-    # def close_connection(self):
-    #     # Close connection
-    #     asyncio.async(self.transport.close())
-    #
-    #     # Delete self from SessionManager
-    #     self.explode()
-    #
-    # def cancel_timeout(self):
-    #     """
-    #     Cancel timeout handler. So the close_connection action will not be acted.
-    #     """
-    #     self._timeout_handler.cancel()
-    #     self._timeout_handler = None
-    #
-    # def touch(self):
-    #     """
-    #     Cancel timeout handler and re-add handler. The client will call `touch` for
-    #     next timeout.
-    #
-    #     Every `heartbeat` message received or every `chat` message received, the session
-    #     will be touched.
-    #     """
-    #     self.cancel_timeout()
-    #     self.add_timeout()
-    #
-    # def explode(self):
-    #     """
-    #     When session explode, it will delete itself from SessionManager.
-    #     """
-    #     self.manager.unregister(self.client)
+    def add_timeout(self):
+        self._timeout_handler = self._loop.call_later(self.timeout, self.timeout_handler)
+
+    def close_connection(self):
+        # Close connection
+        asyncio.async(self.transport.close())
+
+        # Delete self from SessionManager
+        self.explode()
+
+    def cancel_timeout(self):
+        """
+        Cancel timeout handler. So the close_connection action will not be acted.
+        """
+        self._timeout_handler.cancel()
+        self._timeout_handler = None
+
+    def touch(self):
+        """
+        Cancel timeout handler and re-add handler. The client will call `touch` for
+        next timeout.
+
+        Every `heartbeat` message received or every `chat` message received, the session
+        will be touched.
+        """
+        self.cancel_timeout()
+        self.add_timeout()
+
+    def explode(self):
+        """
+        When session explode, it will delete itself from SessionManager.
+        """
+        self.manager.pop_session(self.client)
 
     def close(self):
         """
