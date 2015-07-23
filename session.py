@@ -3,7 +3,8 @@ __author__ = 'nmg'
 __all__ = ['Session']
 
 import asyncio
-import functools
+# import functools
+from struct import pack
 from meta import MetaSession
 
 # class Timer(object):
@@ -133,8 +134,11 @@ class Session(object):
         self._timeout_handler = None
         self.manager = SessionManager()
 
-    def add_timeout(self):
-        self._timeout_handler = self._loop.call_later(self.timeout, self.timeout_handler)
+    def add_timeout(self, timeout=None):
+        if timeout is None:
+            timeout = self.timeout
+
+        self._timeout_handler = self._loop.call_later(timeout, self.timeout_handler)
 
     def close_connection(self):
         # Close connection
@@ -173,6 +177,12 @@ class Session(object):
         """
         asyncio.async(self.transport.close())
         self.transport = None
+
+    def send(self, msg):
+        self.transport.send.json.dumps(msg)
+
+    def write(self, msg):
+        self.transport.write(pack("!I", len(msg)) + bytes(msg, encoding='utf-8'))
 
 
 if __name__ == '__main__':

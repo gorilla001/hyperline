@@ -72,7 +72,8 @@ class Register(MessageHandler):
 
         # Start session timer
 
-        self._session_manager.add_timeout(self.current_uid)
+        # self._session_manager.add_timeout(self.current_uid)
+        session.add_timeout()
 
         # Get offline msgs from db
         offline_msgs = yield from self.get_offline_msgs()
