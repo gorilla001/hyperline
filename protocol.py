@@ -75,8 +75,6 @@ class HyperLineProtocol(asyncio.Protocol):
         """
         raise NotImplementedError()
 
-import websockets
-
 class Connection(object):
     def __init__(self, ws, session):
         self.ws = ws
@@ -114,7 +112,7 @@ class WSProtocol(object):
     def connection_made(self, connection):
         """
         Must override in subclass
-        @param ws: `websockets.WebSocketServerProtocol`
+        @param connection: Connection object
         @return: None
         """
         raise NotImplementedError()
@@ -124,6 +122,7 @@ class WSProtocol(object):
         """
         Must override in subclass
         @param message: entire message
+        @param connection: Connection object
         @return: None
         """
         raise NotImplementedError()
