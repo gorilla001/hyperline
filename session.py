@@ -3,6 +3,7 @@ __author__ = 'nmg'
 __all__ = ['Session']
 
 import asyncio
+import json
 # import functools
 from struct import pack
 from meta import MetaSession
@@ -178,8 +179,9 @@ class Session(object):
         asyncio.async(self.transport.close())
         self.transport = None
 
+    @asyncio.coroutine
     def send(self, msg):
-        yield from self.transport.send.json.dumps(msg)
+        yield from self.transport.send(json.dumps(msg))
 
     def write(self, msg):
         self.transport.write(pack("!I", len(msg)) + bytes(msg, encoding='utf-8'))

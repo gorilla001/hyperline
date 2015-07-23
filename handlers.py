@@ -140,7 +140,7 @@ class SendTextMsg(MessageHandler):
                     session.write(msg)
                 else:
                     # Send raw message directly
-                    session.send(msg)
+                    yield from session.send(msg)
 
                 return asyncio.async(self.save_message(msg))
 
