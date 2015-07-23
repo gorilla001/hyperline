@@ -137,10 +137,10 @@ class SendTextMsg(MessageHandler):
                 # For Web Socket, just send raw message
                 if hasattr(session.transport, 'write'):
                     # Pack message as length-prifixed and send to receiver.
-                    session.transport.write(pack("!I", len(msg)) + bytes(msg, encoding='utf-8'))
+                    session.write(msg)
                 else:
                     # Send raw message directly
-                    yield from session.transport.send(json.dumps(msg))
+                    session.send(msg)
 
                 return asyncio.async(self.save_message(msg))
 

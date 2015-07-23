@@ -179,7 +179,7 @@ class Session(object):
         self.transport = None
 
     def send(self, msg):
-        self.transport.send.json.dumps(msg)
+        yield from self.transport.send.json.dumps(msg)
 
     def write(self, msg):
         self.transport.write(pack("!I", len(msg)) + bytes(msg, encoding='utf-8'))
