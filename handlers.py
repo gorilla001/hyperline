@@ -7,7 +7,6 @@ __all__ = ['MessageHandler']
 
 import asyncio
 import json
-from struct import pack
 import logging
 
 from session import SessionManager

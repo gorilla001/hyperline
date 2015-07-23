@@ -41,11 +41,14 @@ class SessionManager(metaclass=MetaSession):
     . add(update) or delete session
     . manage session life cycle
     . handler session expired
+    . send notify
 
     """
     def __init__(self, timeout=1800):
         # sessions contains client-connection pairs.
-        self.sessions = {}
+        self.sessions = {}  # for normal user
+
+        self.custom_services = {}  # for custom services
 
         self._loop = asyncio.get_event_loop()
         self.interval = 2.0
@@ -71,6 +74,9 @@ class SessionManager(metaclass=MetaSession):
         # Get session associated by client if exists.
 
         return self.sessions.get(client)
+
+    def add_custom_service(self, client):
+        pass
 
     # def add_timeout(self, client):
     #     """
@@ -111,6 +117,22 @@ class SessionManager(metaclass=MetaSession):
     #     Delete session from SessionManager
     #     """
     #     self.pop_session(client)
+    def send_notify(self, client, online=True):
+        """
+        Send online or offline messages to all clients include me.
+
+        Message body should like this:
+
+            {'type': 'notify', 'content': notify-types}
+
+        The notify types have the following values:
+
+           0 - online
+           1 - offline
+           (continue...)
+        """
+        for client in self.sessions.keys():
+            pass
 
     def check_expire(self):
         print(self.sessions)
