@@ -27,3 +27,12 @@ class MetaSession(type):
         if cls not in cls._instances:
             cls._instances[cls] = super(MetaSession, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
+
+
+class MetaMessage(type):
+    """Metaclass for Message"""
+    def __init__(cls, *_):
+        try:
+            cls._msg_factories[cls.__msgtype__] = cls
+        except AttributeError:
+            cls._msg_factories = {}

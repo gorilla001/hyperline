@@ -11,6 +11,7 @@
       <w>inputbox</w>
       <w>kombu</w>
       <w>levelname</w>
+      <w>malformat</w>
       <w>mongo</w>
       <w>msgtype</w>
       <w>navbar</w>
@@ -22,6 +23,7 @@
       <w>prifixed</w>
       <w>pymongo</w>
       <w>recv</w>
+      <w>struct</w>
       <w>tfactory</w>
       <w>timeouted</w>
       <w>unhandle</w>
