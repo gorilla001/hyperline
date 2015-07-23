@@ -53,7 +53,7 @@ class Register(MessageHandler):
 
     def __init__(self):
         self.current_uid = None
-        self.transport = None
+        self.session = None
 
     @asyncio.coroutine
     def handle(self, msg, session):
@@ -65,7 +65,6 @@ class Register(MessageHandler):
             return
 
         session.client = self.current_uid
-        self.transport = session.transport
 
         # Register user in global session
         self._session_manager.add_session(self.current_uid, session)
@@ -79,7 +78,7 @@ class Register(MessageHandler):
         offline_msgs = yield from self.get_offline_msgs()
 
         # Send offline msgs
-        yield from self.send_offline_msgs(offline_msgs)
+        yield from self.send_offline_msgs(offline_msgs, session)
 
     @asyncio.coroutine
     def get_offline_msgs(self):
@@ -87,7 +86,7 @@ class Register(MessageHandler):
         return self._mongodb.get_msgs(receiver=self.current_uid)
 
     @asyncio.coroutine
-    def send_offline_msgs(self, offline_msgs):
+    def send_offline_msgs(self, offline_msgs, session):
         """
         Send offline msgs to current user
         """
@@ -97,12 +96,13 @@ class Register(MessageHandler):
             try:
                 # Normal Socket use method `write` to send message, while Web Socket use method `send`
                 # For Web Socket, just send raw message
-                if hasattr(self.transport, 'write'):
+                # FIXME
+                if hasattr(session.transport, 'write'):
                     # Pack message as length-prifixed and send to receiver.
-                    self.transport.write(pack("!I", len(msg)) + bytes(msg, encoding='utf-8'))
+                    session.write(msg)
                 else:
                     # Send raw message directly
-                    self.transport.send(msg)
+                    session.send(msg)
             except Exception:
                 raise
 
@@ -187,7 +187,8 @@ class HeartBeat(MessageHandler):
 
     @asyncio.coroutine
     def handle(self, msg, _):
-        self._session_manager.touch(msg['uid'])
+        session = self._session_manager.get_session(msg['uid'])
+        session.touch()
 
 class ErrorHandler(MessageHandler):
     """

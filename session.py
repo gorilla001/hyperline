@@ -140,7 +140,7 @@ class Session(object):
 
         self._timeout_handler = self._loop.call_later(timeout, self.timeout_handler)
 
-    def close_connection(self):
+    def timeout_handler(self):
         # Close connection
         asyncio.async(self.transport.close())
 
