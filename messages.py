@@ -29,25 +29,37 @@ class RegisterMessage(Message):
     """
     Register message, message body should like this:
 
-        {'type': 'register', 'uid': 'unique-user-id', 'role': 'user-role'}
+        {'type': 'register', 'uid': 'unique-user-id', 'role': 'user-role', 'service': 'the service will be called'}
 
+        @type: message type
+        @uid:  message sender uid
+        @role: message sender role
+               0 - normal user
+               1 - custom service
+               2 - sport man
+        @service: which service will be called
+                  0 - chat with normal user
+                  1 - chat with custom service
+                  2 - chat which sports man
     """
 
     __msgtype__ = 'register'
 
-    def __init__(self,uid, role):
+    def __init__(self, uid, role, service):
         self.uid = uid
         self.role = role
+        self.service = service
 
     @classmethod
     def factory(cls, msg):
         try:
             uid = msg['uid']
             role = msg['role']
+            service = msg['service']
         except KeyError:
             raise MessageFormatError("Malformed msg {}".format(msg))
 
-        return cls(uid, role)
+        return cls(uid, role, service)
 
 class TextMessage(Message):
     __msgtype__ = 'text'  # Text message
