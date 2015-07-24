@@ -50,23 +50,20 @@ class Register(MessageHandler):
     """
     __msgtype__ = 'register'
 
-    def __init__(self):
-        self.current_uid = None
-        self.session = None
-
     @asyncio.coroutine
     def handle(self, msg, session):
 
-        try:
-            self.current_uid = msg.uid
-        except KeyError:
-            logger.error("Message format is not correct: message uid must be specified")
-            return
-
-        session.client = self.current_uid
+        # try:
+        #     self.current_uid = msg.uid
+        # except KeyError:
+        #     logger.error("Message format is not correct: message uid must be specified")
+        #     return
+        #
+        # session.client = self.current_uid
+        session.client = msg.uid
 
         # Register user in global session
-        self._session_manager.add_session(self.current_uid, session)
+        self._session_manager.add_session(session.client, session)
 
         # Start session timer
 
@@ -74,15 +71,15 @@ class Register(MessageHandler):
         session.add_timeout()
 
         # Get offline msgs from db
-        offline_msgs = yield from self.get_offline_msgs()
+        offline_msgs = yield from self.get_offline_msgs(session)
 
         # Send offline msgs
         yield from self.send_offline_msgs(offline_msgs, session)
 
     @asyncio.coroutine
-    def get_offline_msgs(self):
+    def get_offline_msgs(self, session):
         # Get offline msg from mongodb.
-        return self._mongodb.get_msgs(receiver=self.current_uid)
+        return self._mongodb.get_msgs(receiver=session.client)
 
     @asyncio.coroutine
     def send_offline_msgs(self, offline_msgs, session):
