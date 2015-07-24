@@ -1,6 +1,5 @@
 __author__ = 'nmg'
 
-from struct import pack
 from meta import MetaMessage
 import time
 
@@ -27,6 +26,12 @@ class Message(metaclass=MetaMessage):
             raise MessageFormatError("Malformed msg {}.".format(msg))
 
 class RegisterMessage(Message):
+    """
+    Register message, message body should like this:
+
+        {'type': 'register', 'uid': 'unique-user-id', 'role': 'user-role'}
+
+    """
 
     __msgtype__ = 'register'
 
@@ -42,7 +47,7 @@ class RegisterMessage(Message):
         except KeyError:
             raise MessageFormatError("Malformed msg {}".format(msg))
 
-        return cls(uid, role )
+        return cls(uid, role)
 
 class TextMessage(Message):
     __msgtype__ = 'text'  # Text message
@@ -90,8 +95,8 @@ class UnregisterMessage(Message):
         return cls(uid)
 
 if __name__ == '__main__':
-    msg = {'type': 'register', 'uid': '123456', 'role': '0'}
-    M = Message()(msg)
+    _msg = {'type': 'register', 'uid': '123456', 'role': '0'}
+    M = Message()(_msg)
     print(M.uid, M.role)
 
 
