@@ -53,21 +53,20 @@ class Register(MessageHandler):
     @asyncio.coroutine
     def handle(self, msg, session):
 
-        # try:
-        #     self.current_uid = msg.uid
-        # except KeyError:
-        #     logger.error("Message format is not correct: message uid must be specified")
-        #     return
-        #
-        # session.client = self.current_uid
+        """
+        Register user in session manager.
+
+        If user role is normal, the session will be added into NormalUserSessionManager,
+        if user role is custom service, the session will be added into CustomServiceSessionManager,
+        if user role is sports man, the session will be added into SportsManSessionManager.
+
+        """
         session.client = msg.uid
 
         # Register user in global session
         self._session_manager.add_session(session)
 
         # Start session timer
-
-        # self._session_manager.add_timeout(self.current_uid)
         session.add_timeout()
 
         # # Get offline msgs from db
