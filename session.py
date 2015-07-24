@@ -150,8 +150,9 @@ class Session(object):
     """
 
     def __init__(self, timeout=1800):
-        self.client = None
-        self.transport = None
+        self.client = None  # the client id
+        self.transport = None  # client connection
+        self.service = None  # which service the client called
         self.timeout = timeout
         self._loop = asyncio.get_event_loop()
         self._timeout_handler = None

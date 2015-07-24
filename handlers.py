@@ -62,6 +62,7 @@ class Register(MessageHandler):
 
         """
         session.client = msg.uid
+        session.service = msg.service
 
         # Register user in global session
         self._session_manager.add_session(session)
