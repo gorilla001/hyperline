@@ -93,12 +93,11 @@ class TextMessage(Message):
         except KeyError:
             raise MessageFormatError('Malformed msg {}'.format(msg))
 
-        return cls(sender, receiver, content, timestamp)
+        return cls(receiver, content, timestamp)
 
     @property
     def json(self):
         return {
-            'sender': self.sender,
             'receiver': self.receiver,
             'content': self.content,
             'timestamp': self.timestamp,
