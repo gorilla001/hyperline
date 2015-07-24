@@ -126,7 +126,7 @@ class SendTextMsg(MessageHandler):
         :return: None
         """
         try:
-            session = self._session_manager.get_session(msg['receiver'])
+            session = self._session_manager.get_session(msg.receiver)
         except KeyError:
             logger.error("Message format is not correct: message receiver must be specified")
             return
@@ -172,7 +172,7 @@ class Unregister(MessageHandler):
     @asyncio.coroutine
     def handle(self, msg, _):
         """Unregister user record from global session"""
-        self._session_manager.pop_session(msg['uid'])
+        self._session_manager.pop_session(msg.uid)
 
 class HeartBeat(MessageHandler):
     """
@@ -186,7 +186,7 @@ class HeartBeat(MessageHandler):
 
     @asyncio.coroutine
     def handle(self, msg, _):
-        session = self._session_manager.get_session(msg['uid'])
+        session = self._session_manager.get_session(msg.uid)
         session.touch()
 
 class ErrorHandler(MessageHandler):
