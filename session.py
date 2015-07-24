@@ -58,11 +58,11 @@ class SessionManager(metaclass=MetaSession):
     def looping_call(self):
         self._loop.call_later(self.interval, self.check_expire)
 
-    def add_session(self, client, session):
+    def add_session(self, session):
         """
         Add session in SessionManager
         """
-        self.sessions[client] = session
+        self.sessions[session.client] = session
 
     def pop_session(self, client):
         """

@@ -63,18 +63,18 @@ class Register(MessageHandler):
         session.client = msg.uid
 
         # Register user in global session
-        self._session_manager.add_session(session.client, session)
+        self._session_manager.add_session(session)
 
         # Start session timer
 
         # self._session_manager.add_timeout(self.current_uid)
         session.add_timeout()
 
-        # Get offline msgs from db
-        offline_msgs = yield from self.get_offline_msgs(session)
-
-        # Send offline msgs
-        yield from self.send_offline_msgs(offline_msgs, session)
+        # # Get offline msgs from db
+        # offline_msgs = yield from self.get_offline_msgs(session)
+        #
+        # # Send offline msgs
+        # yield from self.send_offline_msgs(offline_msgs, session)
 
     @asyncio.coroutine
     def get_offline_msgs(self, session):
