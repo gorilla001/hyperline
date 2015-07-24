@@ -4,10 +4,8 @@ __all__ = ['Session']
 
 import asyncio
 import json
-# import functools
 from struct import pack
 from meta import MetaSession
-from manager import NormalUserSessionManager, CustomServiceSessionManager, SportManSessionManager
 
 class SessionManager(metaclass=MetaSession):
     """
@@ -27,39 +25,38 @@ class SessionManager(metaclass=MetaSession):
     . send notify
 
     """
-    def __init__(self, timeout=1800):
-        # sessions contains client-connection pairs.
-        # self.sessions = {}  # for normal user
-        self.normal_user_session_manager = NormalUserSessionManager()
-
-        self._loop = asyncio.get_event_loop()
-        self.interval = 2.0
-        self.timeout = timeout
-        self.looping_call()
-
-    def looping_call(self):
-        self._loop.call_later(self.interval, self.check_expire)
-
-    def add_session(self, session):
-        """
-        Add session in SessionManager
-        """
-        # self.sessions[session.client] = session
-        session.role =
-
-    def pop_session(self, client):
-        """
-        Delete session from SessionManager
-        """
-        self.sessions.pop(client)
-
-    def get_session(self, client):
-        # Get session associated by client if exists.
-
-        return self.sessions.get(client)
-
-    def add_custom_service(self, client):
-        pass
+    # def __init__(self):
+    #
+    # #     self.manager = Manager()
+    # #
+    # #     self._loop = asyncio.get_event_loop()
+    #     self.interval = 2.0
+    #     self.timeout = timeout
+    #     self.looping_call()
+    #
+    # def looping_call(self):
+    #     self._loop.call_later(self.interval, self.check_expire)
+    #
+    # def add_session(self, session):
+    #     """
+    #     Add session in SessionManager
+    #     """
+    #     self.manager.add_session(session)
+    #     # self.sessions[session.client] = session
+    #
+    # def pop_session(self, client):
+    #     """
+    #     Delete session from SessionManager
+    #     """
+    #     self.manager.pop(client)
+    #
+    # def get_session(self, client):
+    #     # Get session associated by client if exists.
+    #
+    #     return self.manager.get_session(client)
+    #
+    # def get_manager(self, session):
+    #     return self._session_manager[session.role]
 
     # def add_timeout(self, client):
     #     """
@@ -100,31 +97,136 @@ class SessionManager(metaclass=MetaSession):
     #     Delete session from SessionManager
     #     """
     #     self.pop_session(client)
-    def send_notify(self, client, online=True):
-        """
-        Send online or offline messages to all clients include me.
-
-        Message body should like this:
-
-            {'type': 'notify', 'content': notify-types}
-
-        The notify types have the following values:
-
-           0 - online
-           1 - offline
-           (continue...)
-        """
-        for client in self.sessions.keys():
+    # def send_notify(self, client, online=True):
+    #     """
+    #     Send online or offline messages to all clients include me.
+    #
+    #     Message body should like this:
+    #
+    #         {'type': 'notify', 'content': notify-types}
+    #
+    #     The notify types have the following values:
+    #
+    #        0 - online
+    #        1 - offline
+    #        (continue...)
+    #     """
+    #     for client in self.sessions.keys():
+    #         pass
+    #
+    # def check_expire(self):
+    #     print(self.sessions)
+    #     self.looping_call()
+    #
+    # def __repr__(self):
+    #     return "{}".format(self.sessions)
+    #
+    # __str__ = __repr__
+    def add_session(self, session):
+        try:
+            _session_manager = self._session_managers[session.role]
+            _session_manager().add_session(session)
+        except KeyError:
             pass
+
+    def pop_session(self, session):
+        try:
+            _session_manager = self._session_managers[session.role]
+            _session_manager().pop_session(session.client)
+        except KeyError:
+            pass
+
+    def get_session(self, msg):
+        try:
+            _session_manager = self._session_managers[msg.service]
+            _session_manager.get_session(msg.client)
+        except KeyError:
+            pass
+
+class NormalUserSessionManager(SessionManager):
+    """
+    Normal user session manager. normal users means external user.
+    """
+    __type__ = '0'
+
+    def __init__(self):
+        self.sessions = {}
+        self._loop = asyncio.get_event_loop()
+        self.looping_call()
+
+    def add_session(self, session):
+        """
+        Add session in SessionManager
+        """
+        self.sessions[session.client] = session
+
+    def pop_session(self, client):
+        """
+        Delete session from SessionManager
+        """
+        self.sessions.pop(client)
+
+    def get_session(self, client):
+        # Get session associated by client if exists.
+
+        return self.sessions.get(client)
+
+    def looping_call(self):
+        self._loop.call_later(2.0, self.check_expire)
 
     def check_expire(self):
         print(self.sessions)
         self.looping_call()
 
-    def __repr__(self):
-        return "{}".format(self.sessions)
+class CustomServiceSessionManager(SessionManager):
+    """
+    Custom service session manager
+    """
+    __type__ = '1'
 
-    __str__ = __repr__
+    def __init__(self):
+        self.sessions = {}
+
+    def add_session(self, session):
+        """
+        Add session in SessionManager
+        """
+        self.sessions[session.client] = session
+
+    def pop_session(self, client):
+        """
+        Delete session from SessionManager
+        """
+        self.sessions.pop(client)
+
+    def get_session(self, client):
+        # Get session associated by client if exists.
+
+        return self.sessions.get(client)
+
+class SportManSessionManager(SessionManager):
+    """
+    Sport man session manager
+    """
+    def __init__(self):
+        self.sessions = {}
+
+    def add_session(self, client, session):
+        """
+        Add session in SessionManager
+        """
+        self.sessions[client] = session
+
+    def pop_session(self, client):
+        """
+        Delete session from SessionManager
+        """
+        self.sessions.pop(client)
+
+    def get_session(self, client):
+        # Get session associated by client if exists.
+
+        return self.sessions.get(client)
 
 class Session(object):
     """
@@ -188,7 +290,8 @@ class Session(object):
 
     @asyncio.coroutine
     def send(self, msg):
-        yield from self.transport.send(json.dumps(msg))
+        # yield from self.transport.send(json.dumps(msg))
+        yield from self.transport.send(json.dumps(msg.json))
 
     def write(self, msg):
         self.transport.write(pack("!I", len(msg)) + bytes(msg, encoding='utf-8'))

@@ -63,23 +63,41 @@ class WSHyperLine(WSProtocol):
         """
         connection.session.transport = connection.ws
 
+        yield from connection.ws.send('welcome')
+
     @asyncio.coroutine
     def message_received(self, message, connection):
+        """
+        Decoding Json object to python dictionary. If it failed, send back the message and close connection.
+        """
+        try:
+            message = json.loads(message)  # If message is json object
+        except ValueError:
+            yield from connection.ws.send("Malformed message {}".format(message))
+            yield from connection.ws.close()
+            return
 
-        if isinstance(message, six.text_type):
-            message = ast.literal_eval(message)
+        # Message format validate
+        # if ('type', 'body') not in message:
+        #     yield from connection.ws.send("Malformed message {}".format(message))
+        #     yield from connection.ws.close()
+        #     return
 
-        if isinstance(message, six.binary_type):
-            message = json.loads(message.decode("utf-8"))
+        #     # if isinstance(message, six.text_type):
+        #     #     message = ast.literal_eval(message)
+        #     #
+        #     # if isinstance(message, six.binary_type):
+        #     #     message = json.loads(message.decode("utf-8"))
 
         return self.handler.handle(self.message(message), connection.session)
 
     @asyncio.coroutine
     def connection_lost(self, connection):
         """Close connection and delete session from SessionManager"""
+        print('connection lost')
         yield from connection.ws.close()
 
-        self.session_manager.pop_session(connection.session.client)
+        self.session_manager.pop_session(connection.session)
 
 
 class HyperLineServer(object):

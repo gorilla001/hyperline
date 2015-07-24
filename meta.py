@@ -28,6 +28,11 @@ class MetaSession(type):
             cls._instances[cls] = super(MetaSession, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
+    def __init__(cls, *_):
+        try:
+            cls._session_managers[cls.__type__] = cls
+        except AttributeError:
+            cls._session_managers = {}
 
 class MetaMessage(type):
     """Metaclass for Message"""

@@ -21,51 +21,64 @@ class Message(metaclass=MetaMessage):
     def __call__(self, msg):
 
         try:
-            return self._msg_factories[msg['type']].factory(msg)
-        except (TypeError, KeyError):
-            raise MessageFormatError("Malformed msg {}.".format(msg))
+            return self._msg_factories[msg['type']].factory(msg['body'])
+        except TypeError:
+            print("Malformed msg {}.".format(msg))
+        except KeyError:
+            print("Malformed msg {}.".format(msg))
+            # raise MessageFormatError("Malformed msg {}.".format(msg))
 
 class RegisterMessage(Message):
     """
     Register message, message body should like this:
 
-        {'type': 'register', 'uid': 'unique-user-id', 'role': 'user-role', 'service': 'the service will be called'}
+        # # {'type': 'register', 'uid': 'unique-user-id', 'role': 'user-role', 'service': 'the service will be called'}
+        # {'type': 'register', 'uid': 'unique-user-id', 'role': 'user-role'}
+        #
+        # @type: message type
+        # @uid:  message sender uid
+        # @role: message sender role
+        #        0 - normal user
+        #        1 - custom service
+        #        2 - sport man
+        # # @service: which service will be called
+        # #           0 - chat with normal user
+        # #           1 - chat with custom service
+        # #           2 - chat which sports man
 
-        @type: message type
-        @uid:  message sender uid
-        @role: message sender role
-               0 - normal user
-               1 - custom service
-               2 - sport man
-        @service: which service will be called
-                  0 - chat with normal user
-                  1 - chat with custom service
-                  2 - chat which sports man
+        {'type':'register', 'body': { 'uid': '1234', 'role': '0'}}
     """
 
     __msgtype__ = 'register'
 
-    def __init__(self, uid, role, service):
+    def __init__(self, uid, role):
         self.uid = uid
         self.role = role
-        self.service = service
 
     @classmethod
     def factory(cls, msg):
         try:
             uid = msg['uid']
             role = msg['role']
-            service = msg['service']
         except KeyError:
             raise MessageFormatError("Malformed msg {}".format(msg))
 
-        return cls(uid, role, service)
+        return cls(uid, role)
+
+    @property
+    def json(self):
+        return {'type': self.__msgtype__, 'uid': self.uid, 'role': self.role}
 
 class TextMessage(Message):
-    __msgtype__ = 'text'  # Text message
+    """
+    Message should like this:
 
-    def __init__(self, sender, receiver, content, timestamp=None):
-        self.sender = sender
+    {'type': 'message', 'body': {'receiver': '5678', 'content': 'hello'}}
+    """
+    __msgtype__ = 'message'  # Text message
+
+    def __init__(self, receiver, content, timestamp=None):
+        # self.sender = sender
         self.receiver = receiver
         self.content = content
         self.timestamp = timestamp
@@ -73,7 +86,7 @@ class TextMessage(Message):
     @classmethod
     def factory(cls, msg):
         try:
-            sender = msg['sender']
+            # sender = msg['sender']
             receiver = msg['receiver']
             content = msg['content']
             timestamp = time.now()

@@ -32,6 +32,8 @@ class MessageHandler(metaclass=MetaHandler):
             _handler = self._msg_handlers[msg.__msgtype__]
         except KeyError:
             return ErrorHandler().handle(msg)
+        except AttributeError:
+            return ErrorHandler().handle(msg)
 
         # Handling messages in a asyncio-Task
         # Don’t directly create Task instances: use the async() function
@@ -63,13 +65,15 @@ class Register(MessageHandler):
         """
         session.client = msg.uid
         session.role = msg.role
-        session.service = msg.service
+        # session.service = msg.service
 
         # Register user in global session
         self._session_manager.add_session(session)
 
         # Start session timer
         session.add_timeout()
+
+        yield from session.send(msg)
 
         # # Get offline msgs from db
         # offline_msgs = yield from self.get_offline_msgs(session)
@@ -112,10 +116,10 @@ class SendTextMsg(MessageHandler):
         {'type': 'text', 'sender': 'Jack', 'receiver': 'Rose', 'content': 'I love you forever'}
 
     """
-    __msgtype__ = 'text'  # Text message
+    __msgtype__ = 'message'  # Text message
 
     @asyncio.coroutine
-    def handle(self, msg, _):
+    def handle(self, msg, session):
         """
         Send message to receiver if receiver is online, and
         save message to mongodb. Otherwise save
@@ -124,20 +128,20 @@ class SendTextMsg(MessageHandler):
         :return: None
         """
         try:
-            session = self._session_manager.get_session(msg.receiver)
+            _session = self._session_manager.get_session(msg)
         except KeyError:
             logger.error("Message format is not correct: message receiver must be specified")
             return
 
-        if session:
+        if _session:
                 # Normal Socket use method `write` to send message, while Web Socket use method `send`
                 # For Web Socket, just send raw message
-                if hasattr(session.transport, 'write'):
+                if hasattr(_session.transport, 'write'):
                     # Pack message as length-prifixed and send to receiver.
-                    session.write(msg)
+                    _session.write(msg)
                 else:
                     # Send raw message directly
-                    yield from session.send(msg)
+                    yield from _session.send(msg)
 
                 return asyncio.async(self.save_message(msg))
 
@@ -168,9 +172,9 @@ class Unregister(MessageHandler):
     __msgtype__ = 'unregister'
 
     @asyncio.coroutine
-    def handle(self, msg, _):
+    def handle(self, msg, session):
         """Unregister user record from global session"""
-        self._session_manager.pop_session(msg.uid)
+        self._session_manager.pop_session(session)
 
 class HeartBeat(MessageHandler):
     """
@@ -194,5 +198,5 @@ class ErrorHandler(MessageHandler):
     __msgtype__ = 'unknown'
 
     def handle(self, msg):
-        logger.info("Unknown message type: {}".format(msg))
+        print("Unknown message type: {}".format(msg))
 
