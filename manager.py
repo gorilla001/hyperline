@@ -25,6 +25,15 @@ class Manager(object):
 
         return self.sessions.get(client)
 
+class NormalUserSessionManager(Manager):
+    """
+    Normal user session manager. normal users means external user.
+    """
+    def __init__(self):
+        self.sessions = {}
+
+        super().__init__(self.sessions)
+
 class CustomServiceSessionManager(Manager):
     """
     Custom service session manager
