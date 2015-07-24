@@ -29,7 +29,7 @@ class MessageHandler(metaclass=MetaHandler):
 
     def handle(self, msg, session):
         try:
-            _handler = self._msg_handlers[msg['type']]
+            _handler = self._msg_handlers[msg.__msgtype__]
         except KeyError:
             return ErrorHandler().handle(msg)
 
@@ -58,7 +58,7 @@ class Register(MessageHandler):
     def handle(self, msg, session):
 
         try:
-            self.current_uid = msg['uid']
+            self.current_uid = msg.uid
         except KeyError:
             logger.error("Message format is not correct: message uid must be specified")
             return

@@ -35,7 +35,7 @@ class RegisterMessage(Message):
 
     __msgtype__ = 'register'
 
-    def __init__(self, uid, role):
+    def __init__(self,uid, role):
         self.uid = uid
         self.role = role
 

@@ -31,7 +31,7 @@ import websockets
 class SlowSquareClientProtocol(WebSocketClientProtocol):
 
     def onOpen(self):
-        message = {'type': 'register', 'uid': 'client-1'}
+        message = {'type': 'register', 'uid': 'client-1', 'role': '0'}
         self.sendMessage(json.dumps(message).encode('utf8'))
 
         print('connected')
