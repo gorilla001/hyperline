@@ -62,6 +62,7 @@ class Register(MessageHandler):
 
         """
         session.client = msg.uid
+        session.role = msg.role
         session.service = msg.service
 
         # Register user in global session

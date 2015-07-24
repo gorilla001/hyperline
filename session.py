@@ -7,25 +7,8 @@ import json
 # import functools
 from struct import pack
 from meta import MetaSession
+from manager import NormalUserSessionManager, CustomServiceSessionManager, SportManSessionManager
 
-# class Timer(object):
-#     """
-#     Session Timer
-#     """
-#     def __init__(self, timeout):
-#         self.timeout = timeout
-#         self._loop = asyncio.get_event_loop()
-#         self._timeout_handler = None
-#
-#     def add_handler(self, handler):
-#         pass
-#
-#     def start(self):
-#         self._timeout_handler = self._loop.call_later(self.timeout, self.close_connection)
-#
-#     def cancel(self):
-#         self._timeout_handler.cancel()
-#         self._timeout_handler = None
 class SessionManager(metaclass=MetaSession):
     """
     Manage session objects.
@@ -46,9 +29,8 @@ class SessionManager(metaclass=MetaSession):
     """
     def __init__(self, timeout=1800):
         # sessions contains client-connection pairs.
-        self.sessions = {}  # for normal user
-
-        self.custom_services = {}  # for custom services
+        # self.sessions = {}  # for normal user
+        self.normal_user_session_manager = NormalUserSessionManager()
 
         self._loop = asyncio.get_event_loop()
         self.interval = 2.0
@@ -62,7 +44,8 @@ class SessionManager(metaclass=MetaSession):
         """
         Add session in SessionManager
         """
-        self.sessions[session.client] = session
+        # self.sessions[session.client] = session
+        session.role =
 
     def pop_session(self, client):
         """
@@ -150,7 +133,8 @@ class Session(object):
     """
 
     def __init__(self, timeout=1800):
-        self.client = None  # the client id
+        self.client = None  # client id
+        self.role = None  # client role
         self.transport = None  # client connection
         self.service = None  # which service the client called
         self.timeout = timeout
