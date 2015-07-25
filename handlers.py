@@ -77,8 +77,14 @@ class Register(MessageHandler):
         Choose service man from service session manager, and send back
         service man's name and id to client.
         """
-
-        yield from session.send(msg)
+        try:
+            cs_id = self._session_manager.get_sessions().pop()
+            # message = {'type': 'reply', 'body': {'status': 200, 'cs_id': cs_id}}
+            msg = {'status': 200, 'cs_id': cs_id}
+            yield from session.send(msg)
+        except IndexError:
+            msg = {'status': 404}
+            yield from session.send(msg)
 
         # # Get offline msgs from db
         # offline_msgs = yield from self.get_offline_msgs(session)
