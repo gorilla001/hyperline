@@ -38,10 +38,10 @@ class SlowSquareClientProtocol(WebSocketClientProtocol):
 
         print('connected')
 
-        # while True:
-        #     data = input(">")
-        #     message = {'type': 'text', 'sender': 'client-1', 'receiver': 'zhangsan', 'content': data}
-        #     self.sendMessage(json.dumps(message).encode('utf8'))
+        while True:
+            data = input(">")
+            message = {'type': 'message', 'body': {'content': data}}
+            self.sendMessage(json.dumps(message).encode('utf8'))
 
     def onMessage(self, payload, isBinary):
         pass

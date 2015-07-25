@@ -82,32 +82,29 @@ class TextMessage(Message):
     """
     Message should like this:
 
-    {'type': 'message', 'body': {'receiver': '5678', 'content': 'hello'}}
+    # {'type': 'message', 'body': {'receiver': '5678', 'content': 'hello'}}
+    {'type': 'message', 'body': {'content': 'content'}}
     """
     __msgtype__ = 'message'  # Text message
 
-    def __init__(self, receiver, content, timestamp=None):
+    def __init__(self, content, timestamp=None):
         # self.sender = sender
-        self.receiver = receiver
         self.content = content
         self.timestamp = timestamp
 
     @classmethod
     def factory(cls, msg):
         try:
-            # sender = msg['sender']
-            receiver = msg['receiver']
             content = msg['content']
             timestamp = time.now()
         except KeyError:
             raise MessageFormatError('Malformed msg {}'.format(msg))
 
-        return cls(receiver, content, timestamp)
+        return cls(content, timestamp)
 
     @property
     def json(self):
         return {
-            'receiver': self.receiver,
             'content': self.content,
             'timestamp': self.timestamp,
         }
