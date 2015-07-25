@@ -142,25 +142,30 @@ class SendTextMsg(MessageHandler):
         :param msg: message to send
         :return: None
         """
-        try:
-            _session = self._session_manager.get_session(msg)
-        except KeyError:
-            logger.error("Message format is not correct: message receiver must be specified")
-            return
+        # try:
+        #     # _session = self._session_manager.get_session(msg)
+        #
+        # except KeyError:
+        #     logger.error("Message format is not correct: message receiver must be specified")
+        #     return
 
-        if _session:
-                # Normal Socket use method `write` to send message, while Web Socket use method `send`
-                # For Web Socket, just send raw message
-                if hasattr(_session.transport, 'write'):
-                    # Pack message as length-prifixed and send to receiver.
-                    _session.write(msg)
-                else:
-                    # Send raw message directly
-                    yield from _session.send(msg)
-
-                return asyncio.async(self.save_message(msg))
-
-        return asyncio.async(self.save_message(msg, online=False))
+        # if _session:
+        #         # Normal Socket use method `write` to send message, while Web Socket use method `send`
+        #         # For Web Socket, just send raw message
+        #         if hasattr(_session.transport, 'write'):
+        #             # Pack message as length-prifixed and send to receiver.
+        #             _session.write(msg)
+        #         else:
+        #             # Send raw message directly
+        #             yield from _session.send(msg)
+        #
+        #         return asyncio.async(self.save_message(msg))
+        #
+        # return asyncio.async(self.save_message(msg, online=False))
+        if hasattr(session.target.transport, 'write'):
+            session.target.write(msg)
+        else:
+            yield from session.target.send(msg)
 
     @asyncio.coroutine
     def save_message(self, msg, online=True):
