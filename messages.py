@@ -87,21 +87,21 @@ class TextMessage(Message):
     """
     __msgtype__ = 'message'  # Text message
 
-    def __init__(self, content, timestamp=None):
-        # self.sender = sender
+    def __init__(self, recipient, content, timestamp=None):
+        self.recipient = recipient
         self.content = content
         self.timestamp = timestamp
 
     @classmethod
     def factory(cls, msg):
         try:
-            print('message factory')
+            recipient = msg['recipient']
             content = msg['content']
             timestamp = time.time()
         except KeyError:
             raise MessageFormatError('Malformed msg {}'.format(msg))
 
-        return cls(content, timestamp)
+        return cls(recipient, content, timestamp)
 
     @property
     def json(self):
@@ -128,6 +128,11 @@ class UnregisterMessage(Message):
 class ReplyMessage(Message):
     """
     Used for sender back to client with custom service id
+
+    Message should like this:
+
+    {'type': 'reply', 'body': {'status': 200, 'cs_id': custom_service}}
+
     """
     __msgtype__ = 'reply'
 
