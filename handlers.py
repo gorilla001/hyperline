@@ -83,9 +83,8 @@ class Register(MessageHandler):
             custom_service = self._session_manager.get_sessions().pop()
             message = {'type': 'reply', 'body': {'status': 200, 'cs_id': custom_service}}
 
-            session.target = custom_service
             custom_service_session = self._session_manager.get_session(custom_service)
-            custom_service_session.target = session.client
+            session.target, custom_service_session.target = custom_service_session, session
         except IndexError:
             message = {'type': 'reply', 'body': {'status': 404, 'cs_id': ''}}
 
