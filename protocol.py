@@ -116,8 +116,8 @@ class WSProtocol(object):
                 yield from self.message_received(message, connection)
             except MessageFormatError as exc:
                 print(exc)
-                yield from self.connection_lost(connection)
-                break
+                # yield from self.connection_lost(connection)
+                # break
 
     @asyncio.coroutine
     def connection_made(self, connection):
