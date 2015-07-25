@@ -4,11 +4,11 @@ from meta import MetaMessage
 import time
 
 class MessageFormatError(Exception):
-    def __init__(self, err_msg):
-        self.err_msg = err_msg
+    def __init__(self, err_msg=None):
+        self.err_msg = err_msg if not None else "Malformed msg"
 
     def __str__(self):
-        return self.err_msg
+        return 'MessageFormatError: {}'.format(self.err_msg)
 
 class Message(metaclass=MetaMessage):
     """
@@ -68,6 +68,15 @@ class RegisterMessage(Message):
     @property
     def json(self):
         return {'type': self.__msgtype__, 'uid': self.uid, 'role': self.role}
+
+# class RequestMessage(Message):
+#     """
+#     Ask for specified service, such as custom service or sports man service.
+#
+#     Message should like this:
+#
+#     {'type': 'request', 'body': {'content':
+#     """
 
 class TextMessage(Message):
     """

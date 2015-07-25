@@ -32,32 +32,32 @@ class SlowSquareClientProtocol(WebSocketClientProtocol):
 
     def onOpen(self):
         message = "{'type': 'register', 'uid': 'client-1', 'role': '0', 'service': 1}"
-        self.sendMessage(json.dumps(message).encode('utf8'))
+        # self.sendMessage(json.dumps(message).encode('utf8'))
         # #self.sendMessage(bytes(message, encoding='utf8'))
-        # self.sendMessage(bytes('hello', encoding='utf8'))
+        self.sendMessage(bytes('hello', encoding='utf8'))
 
         print('connected')
 
-        while True:
-            data = input(">")
-            message = {'type': 'text', 'sender': 'client-1', 'receiver': 'zhangsan', 'content': data}
-            self.sendMessage(json.dumps(message).encode('utf8'))
+        # while True:
+        #     data = input(">")
+        #     message = {'type': 'text', 'sender': 'client-1', 'receiver': 'zhangsan', 'content': data}
+        #     self.sendMessage(json.dumps(message).encode('utf8'))
 
     def onMessage(self, payload, isBinary):
-
+        pass
         # if not isBinary:
         #     res = json.loads(payload.decode('utf8'))
         #     print("< {}".format(res))
         #     self.sendClose()
         #res = json.loads(payload.decode('utf8'))
         #print(res)
-        print(payload)
-
-        #print('< {}'.format(res['content']))
-
-        data = input(">")
-        message = {'type': 'text', 'sender': 'client-1', 'receiver': 'client-2', 'content': data}
-        self.sendMessage(json.dumps(message).encode('utf8'))
+        # print(payload)
+        #
+        # #print('< {}'.format(res['content']))
+        #
+        # data = input(">")
+        # message = {'type': 'text', 'sender': 'client-1', 'receiver': 'client-2', 'content': data}
+        # self.sendMessage(json.dumps(message).encode('utf8'))
 
     def onClose(self, wasClean, code, reason):
         if reason:

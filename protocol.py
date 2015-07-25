@@ -6,6 +6,8 @@ import logging
 
 from session import Session
 
+from messages import MessageFormatError
+
 _MESSAGE_PREFIX_LENGTH = 4
 
 _BYTE_ORDER = 'big'
@@ -80,6 +82,10 @@ class Connection(object):
         self.ws = ws
         self.session = session
 
+    @property
+    def address(self):
+        return "{}:{}".format(self.ws.host, self.ws.port)
+
 class WSProtocol(object):
     """
     Web socket protocol. Handling message data.
@@ -106,7 +112,12 @@ class WSProtocol(object):
                 yield from self.connection_lost(connection)
                 break
             # Consuming message in a coroutine.
-            yield from self.message_received(message, connection)
+            try:
+                yield from self.message_received(message, connection)
+            except MessageFormatError as exc:
+                print(exc)
+                yield from self.connection_lost(connection)
+                break
 
     @asyncio.coroutine
     def connection_made(self, connection):

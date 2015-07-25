@@ -12,6 +12,7 @@ from protocol import WSProtocol
 from handlers import MessageHandler
 from session import SessionManager
 from messages import Message
+from messages import MessageFormatError
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +62,8 @@ class WSHyperLine(WSProtocol):
         """
         Populated session attribute `transport` with `ws` from connection
         """
+        print('connected from {}'.format(connection.address))
+
         connection.session.transport = connection.ws
 
         yield from connection.ws.send('welcome')
@@ -73,12 +76,11 @@ class WSHyperLine(WSProtocol):
         try:
             message = json.loads(message)  # If message is json object
         except ValueError:
-            yield from connection.ws.send("Malformed message {}".format(message))
-            yield from connection.ws.close()
-            return
+            raise MessageFormatError('message is not json object')
 
         # Message format validate
-        # if ('type', 'body') not in message:
+        if {'type', 'body'} != set(message):
+            raise MessageFormatError('type or body fields must be specified')
         #     yield from connection.ws.send("Malformed message {}".format(message))
         #     yield from connection.ws.close()
         #     return
@@ -94,7 +96,8 @@ class WSHyperLine(WSProtocol):
     @asyncio.coroutine
     def connection_lost(self, connection):
         """Close connection and delete session from SessionManager"""
-        print('connection lost')
+        print('connection lost from {}'.format(connection.address))
+
         yield from connection.ws.close()
 
         self.session_manager.pop_session(connection.session)
