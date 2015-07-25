@@ -136,21 +136,19 @@ class SessionManager(metaclass=MetaSession):
         except KeyError:
             pass
 
-    def get_session(self, msg):
+    def get_session(self, client, service_id='10'):
         try:
-            _session_manager = self._session_managers[msg.service]
-            _session_manager.get_session(msg.client)
+            _session_manager = self._session_managers[service_id]
+            return _session_manager().get_session(client)
         except KeyError:
             pass
 
-    def get_sessions(self, service_id=None):
-
-        service_id = '1' if service_id is None else service_id
-
-        print(service_id)
+    def get_sessions(self, service_id='10'):
+        """
+        Get all session clients from session manager specified by service_id
+        """
         try:
             _session_manager = self._session_managers[service_id]
-            print(_session_manager)
             return list(_session_manager().sessions.keys())
         except KeyError:
             pass
@@ -194,7 +192,7 @@ class CustomServiceSessionManager(SessionManager):
     """
     Custom service session manager
     """
-    __type__ = '1'
+    __type__ = '10'
 
     def __init__(self):
         self.sessions = {}
@@ -213,7 +211,6 @@ class CustomServiceSessionManager(SessionManager):
 
     def get_session(self, client):
         # Get session associated by client if exists.
-
         return self.sessions.get(client)
 
 class SportManSessionManager(SessionManager):
@@ -251,6 +248,7 @@ class Session(object):
         self.role = None  # client role
         self.transport = None  # client connection
         self.service = None  # which service the client called
+        self.target = None  # message target for this session
         self.timeout = timeout
         self._loop = asyncio.get_event_loop()
         self._timeout_handler = None

@@ -80,12 +80,16 @@ class Register(MessageHandler):
         service man's name and id to client.
         """
         try:
-            cs_id = self._session_manager.get_sessions().pop()
-            msg = {'type': 'reply', 'body': {'status': 200, 'cs_id': cs_id}}
-        except IndexError:
-            msg = {'type': 'reply', 'body': {'status': 404, 'cs_id': ''}}
+            custom_service = self._session_manager.get_sessions().pop()
+            message = {'type': 'reply', 'body': {'status': 200, 'cs_id': custom_service}}
 
-        yield from session.send(self._message(msg))
+            session.target = custom_service
+            custom_service_session = self._session_manager.get_session(custom_service)
+            custom_service_session.target = session.client
+        except IndexError:
+            message = {'type': 'reply', 'body': {'status': 404, 'cs_id': ''}}
+
+        yield from session.send(self._message(message))
 
         # # Get offline msgs from db
         # offline_msgs = yield from self.get_offline_msgs(session)

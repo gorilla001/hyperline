@@ -7,7 +7,7 @@ class User(Enum):
     Identified user type
     """
     normal_user = 0
-    custom_service = 1
+    custom_service = 10
     sport_man = 2
 
 
