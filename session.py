@@ -143,6 +143,15 @@ class SessionManager(metaclass=MetaSession):
         except KeyError:
             pass
 
+    def get_sessions(self, service_id=None):
+
+        service_id = service_id if not None else '1'
+        try:
+            _session_manager = self._session_managers[service_id]
+            return list(_session_manager.sessions.keys())
+        except KeyError:
+            pass
+
 class NormalUserSessionManager(SessionManager):
     """
     Normal user session manager. normal users means external user.

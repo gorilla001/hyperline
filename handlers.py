@@ -73,6 +73,11 @@ class Register(MessageHandler):
         # Start session timer
         session.add_timeout()
 
+        """
+        Choose service man from service session manager, and send back
+        service man's name and id to client.
+        """
+
         yield from session.send(msg)
 
         # # Get offline msgs from db
