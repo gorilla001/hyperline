@@ -40,7 +40,7 @@ class SlowSquareClientProtocol(WebSocketClientProtocol):
 
         while True:
             data = input(">")
-            message = {'type': 'message', 'body': {'content': data}}
+            message = {'type': 'message', 'body': {'receiver': '1234', 'content': data}}
             self.sendMessage(json.dumps(message).encode('utf8'))
 
     def onMessage(self, payload, isBinary):
