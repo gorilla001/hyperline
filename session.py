@@ -145,10 +145,13 @@ class SessionManager(metaclass=MetaSession):
 
     def get_sessions(self, service_id=None):
 
-        service_id = service_id if not None else '1'
+        service_id = '1' if service_id is None else service_id
+
+        print(service_id)
         try:
             _session_manager = self._session_managers[service_id]
-            return list(_session_manager.sessions.keys())
+            print(_session_manager)
+            return list(_session_manager().sessions.keys())
         except KeyError:
             pass
 

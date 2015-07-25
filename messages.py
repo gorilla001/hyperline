@@ -127,6 +127,31 @@ class UnregisterMessage(Message):
 
         return cls(uid)
 
+class ReplyMessage(Message):
+    """
+    Used for sender back to client with custom service id
+    """
+    __msgtype__ = 'reply'
+
+    def __init__(self, status, cs_id):
+        self.status = status
+        self.cs_id = cs_id
+
+    @classmethod
+    def factory(cls, msg):
+        try:
+            status = msg['status']
+            cs_id = msg['cs_id']
+        except KeyError:
+            raise MessageFormatError("Malformed msg {}".format(msg))
+
+        return cls(status, cs_id)
+
+    @property
+    def json(self):
+        return {'type': self.__msgtype__, 'body': {'status': self.status, 'cs_id': self.cs_id}}
+
+
 if __name__ == '__main__':
     _msg = {'type': 'register', 'uid': '123456', 'role': '0'}
     M = Message()(_msg)

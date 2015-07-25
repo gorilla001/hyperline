@@ -11,6 +11,7 @@ import logging
 
 from session import SessionManager
 from mongodb import MongoProxy
+from messages import Message
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,7 @@ class MessageHandler(metaclass=MetaHandler):
     """
     _session_manager = SessionManager()
     _mongodb = MongoProxy()
+    _message = Message()
 
     def handle(self, msg, session):
         try:
@@ -79,12 +81,11 @@ class Register(MessageHandler):
         """
         try:
             cs_id = self._session_manager.get_sessions().pop()
-            # message = {'type': 'reply', 'body': {'status': 200, 'cs_id': cs_id}}
-            msg = {'status': 200, 'cs_id': cs_id}
-            yield from session.send(msg)
+            msg = {'type': 'reply', 'body': {'status': 200, 'cs_id': cs_id}}
         except IndexError:
-            msg = {'status': 404}
-            yield from session.send(msg)
+            msg = {'type': 'reply', 'body': {'status': 404, 'cs_id': ''}}
+
+        yield from session.send(self._message(msg))
 
         # # Get offline msgs from db
         # offline_msgs = yield from self.get_offline_msgs(session)
