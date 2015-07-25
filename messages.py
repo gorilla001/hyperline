@@ -95,8 +95,9 @@ class TextMessage(Message):
     @classmethod
     def factory(cls, msg):
         try:
+            print('message factory')
             content = msg['content']
-            timestamp = time.now()
+            timestamp = time.time()
         except KeyError:
             raise MessageFormatError('Malformed msg {}'.format(msg))
 
