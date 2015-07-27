@@ -83,7 +83,7 @@ class Register(MessageHandler):
         """
         try:
             custom_service = self._session_manager.get_sessions().pop()
-            message = {'type': 'reply', 'body': {'status': 200, 'cs_id': custom_service}}
+            message = {'type': 'reply', 'body': {'status': 200, 'content': custom_service}}
 
             # One custom service maybe has many customers
             custom_service_session = self._session_manager.get_session(custom_service)
@@ -93,7 +93,7 @@ class Register(MessageHandler):
             session.target.append(custom_service_session)
 
         except IndexError:
-            message = {'type': 'reply', 'body': {'status': 404, 'cs_id': ''}}
+            message = {'type': 'reply', 'body': {'status': 404, 'content': ''}}
 
         yield from session.send(self._message(message))
 
