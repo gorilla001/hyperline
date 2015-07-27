@@ -41,10 +41,9 @@ class Message(metaclass=MetaMessage):
         try:
             return self._msg_factories[msg['type']].factory(msg['body'])
         except TypeError:
-            logging.error("Malformed msg {}.".format(msg))
+            logger.error("Malformed msg {}.".format(msg))
         except KeyError:
-            logging.error("Malformed msg {}.".format(msg))
-            # raise MessageFormatError("Malformed msg {}.".format(msg))
+            raise MessageFormatError("Malformed msg {}.".format(msg))
 
 class RegisterMessage(Message):
     """
@@ -137,7 +136,7 @@ class TextMessage(Message):
 
     # {'type': 'message', 'body': {'receiver': '5678', 'content': 'hello'}}
     # {'type': 'message', 'body': {'recipient': 'recipient','role': 'role', 'content': 'content'}}
-    {'type': 'message', 'body': { 'recv': ' ', 'content': ' '}}
+    {'type': '1', 'body': { 'recv': ' ', 'content': ' '}}
     """
     # __msgtype__ = 'message'  # Text message
     __msgtype__ = MessageType.message

@@ -88,7 +88,12 @@ class WSHyperLine(WSProtocol):
         #     #
         #     # if isinstance(message, six.binary_type):
         #     #     message = json.loads(message.decode("utf-8"))
-        logger.info("Send message {}".format(message))
+        # logger.info("Send message {}".format(message))
+        # try:
+        #     message = self.message(message)
+        # except MessageFormatError:
+        #     logger.error("Malformed msg {}.".format(message))
+        #     return
 
         return self.handler.handle(self.message(message), connection.session)
 

@@ -6,6 +6,10 @@ import asyncio
 import json
 from struct import pack
 from meta import MetaSession
+import websockets
+import log as logging
+
+logger = logging.getLogger(__name__)
 
 class SessionManager(metaclass=MetaSession):
     """
@@ -162,7 +166,7 @@ class NormalUserSessionManager(SessionManager):
     def __init__(self):
         self.sessions = {}
         self._loop = asyncio.get_event_loop()
-        # self.looping_call()
+        self.looping_call()
 
     def add_session(self, session):
         """
@@ -182,7 +186,7 @@ class NormalUserSessionManager(SessionManager):
         return self.sessions.get(client)
 
     def looping_call(self):
-        self._loop.call_later(2.0, self.check_expire)
+        self._loop.call_later(5.0, self.check_expire)
 
     def check_expire(self):
         print(self.sessions)
@@ -249,8 +253,8 @@ class Session(object):
         self.role = None  # client role
 
         self.transport = None  # client connection
-        self.service = None  # which service the client called
-        self.target = []  # message target for this session
+        # self.service = None  # which service the client called
+        # self.target = []  # message target for this session
         self.timeout = timeout
         self._loop = asyncio.get_event_loop()
         self._timeout_handler = None
@@ -291,7 +295,7 @@ class Session(object):
         """
         When session explode, it will delete itself from SessionManager.
         """
-        self.manager.pop_session(self.client)
+        self.manager.pop_session(self.uid)
 
     def close(self):
         """
@@ -303,7 +307,10 @@ class Session(object):
     @asyncio.coroutine
     def send(self, msg):
         # yield from self.transport.send(json.dumps(msg))
-        yield from self.transport.send(json.dumps(msg.json))
+        try:
+            yield from self.transport.send(json.dumps(msg.json))
+        except websockets.exceptions.InvalidState as exc:
+            logger.error("Send message failed! {}".format(exc))
 
     def write(self, msg):
         self.transport.write(pack("!I", len(msg)) + bytes(msg, encoding='utf-8'))

@@ -172,31 +172,31 @@ class SendTextMsg(MessageHandler):
         :param msg: message to send
         :return: None
         """
-        for _session in session.target:
-            if _session.uid == msg.recv:
-                if hasattr(_session.transport, 'write'):
-                    # Pack message as length-prifixed and send to receiver.
-                    _session.write(msg)
-                else:
-                    # Send raw message directly
-                    logger.info("Send message {}".format(msg))
-                    yield from _session.send(msg)
-
-        # try:
-        #     _session = self._session_manager.get_session(msg.recipient, service_id='0')
-        # except KeyError:
-        #     logger.error("Message format is not correct: message receiver must be specified")
-        #     return
-        #
-        # if _session:
-        #         # Normal Socket use method `write` to send message, while Web Socket use method `send`
-        #         # For Web Socket, just send raw message
+        # for _session in session.target:
+        #     if _session.uid == msg.recv:
         #         if hasattr(_session.transport, 'write'):
         #             # Pack message as length-prifixed and send to receiver.
         #             _session.write(msg)
         #         else:
         #             # Send raw message directly
+        #             print(_session, _session.uid)
         #             yield from _session.send(msg)
+
+        try:
+            _session = self._session_manager.get_session(msg.recv)
+        except KeyError:
+            logger.error("Message format is not correct: message receiver must be specified")
+            return
+
+        if _session:
+                # Normal Socket use method `write` to send message, while Web Socket use method `send`
+                # For Web Socket, just send raw message
+                if hasattr(_session.transport, 'write'):
+                    # Pack message as length-prifixed and send to receiver.
+                    _session.write(msg)
+                else:
+                    # Send raw message directly
+                    yield from _session.send(msg)
 
         #         return asyncio.async(self.save_message(msg))
         #
@@ -260,11 +260,11 @@ class RequestForService(MessageHandler):
             ready_message.uid = session.uid
             ready_message.name = session.name
 
-            # One custom service maybe has many customers
-            custom_service.target.append(session)
-
-            # One customer has only one custom service
-            session.target.append(custom_service)
+            # # One custom service maybe has many customers
+            # custom_service.target.append(session)
+            #
+            # # One customer has only one custom service
+            # session.target.append(custom_service)
 
             # Send ready message to custom service
             yield from custom_service.send(ready_message)
