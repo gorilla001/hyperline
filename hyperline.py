@@ -88,6 +88,7 @@ class WSHyperLine(WSProtocol):
         #     #
         #     # if isinstance(message, six.binary_type):
         #     #     message = json.loads(message.decode("utf-8"))
+        logger.info("Send message {}".format(message))
 
         return self.handler.handle(self.message(message), connection.session)
 

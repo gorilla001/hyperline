@@ -162,7 +162,7 @@ class NormalUserSessionManager(SessionManager):
     def __init__(self):
         self.sessions = {}
         self._loop = asyncio.get_event_loop()
-        self.looping_call()
+        # self.looping_call()
 
     def add_session(self, session):
         """

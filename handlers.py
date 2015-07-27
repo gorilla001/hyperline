@@ -179,6 +179,7 @@ class SendTextMsg(MessageHandler):
                     _session.write(msg)
                 else:
                     # Send raw message directly
+                    logger.info("Send message {}".format(msg))
                     yield from _session.send(msg)
 
         # try:

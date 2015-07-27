@@ -160,10 +160,8 @@ class TextMessage(Message):
 
     @property
     def json(self):
-        return {
-            'content': self.content,
-            'timestamp': self.timestamp,
-        }
+        return {'type': self.__msgtype__.value,
+                'body': {'recv': self.recv, 'content': self.content, 'timestamp': self.timestamp}}
 
 class UnregisterMessage(Message):
     # __msgtype__ = 'unregister'
