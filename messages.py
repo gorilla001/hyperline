@@ -2,6 +2,16 @@ __author__ = 'nmg'
 
 from meta import MetaMessage
 import time
+from enum import Enum
+
+class MessageType(Enum):
+    """
+    Message type
+    """
+    register = '0'
+    message = '1'
+    unregister = '2'
+    reply = '3'
 
 class MessageFormatError(Exception):
     def __init__(self, err_msg=None):
@@ -49,7 +59,8 @@ class RegisterMessage(Message):
         {'type':'register', 'body': { 'uid': '1234', 'role': '0'}}
     """
 
-    __msgtype__ = 'register'
+    # __msgtype__ = 'register'
+    __msgtype__ = MessageType.register
 
     def __init__(self, uid, role):
         self.uid = uid
@@ -86,7 +97,8 @@ class TextMessage(Message):
     # {'type': 'message', 'body': {'recipient': 'recipient','role': 'role', 'content': 'content'}}
     {'type': 'message', 'body': { 'recv': ' ', 'content': ' '}}
     """
-    __msgtype__ = 'message'  # Text message
+    # __msgtype__ = 'message'  # Text message
+    __msgtype__ = MessageType.message
 
     def __init__(self, recv, content, timestamp=None):
         self.recv = recv
@@ -112,7 +124,8 @@ class TextMessage(Message):
         }
 
 class UnregisterMessage(Message):
-    __msgtype__ = 'unregister'
+    # __msgtype__ = 'unregister'
+    __msgtype__ = MessageType.unregister
 
     def __init__(self, uid):
         self.uid = uid
@@ -132,10 +145,11 @@ class ReplyMessage(Message):
 
     Message should like this:
 
-    {'type': 'reply', 'body': {'status': 200, 'cs_id': custom_service}}
+    {'type': 'reply', 'body': {'status': 200, 'content': 'message-content'}
 
     """
-    __msgtype__ = 'reply'
+    # __msgtype__ = 'reply'
+    __msgtype__ = MessageType.reply
 
     def __init__(self, status, cs_id):
         self.status = status

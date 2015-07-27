@@ -14,7 +14,7 @@ class MetaHandler(type):
 
     def __init__(cls, *_):
         try:
-            cls._msg_handlers[cls.__msgtype__] = cls
+            cls._msg_handlers[cls.__msgtype__.value] = cls
         except AttributeError:
             cls._msg_handlers = {}
 
@@ -38,6 +38,6 @@ class MetaMessage(type):
     """Metaclass for Message"""
     def __init__(cls, *_):
         try:
-            cls._msg_factories[cls.__msgtype__] = cls
+            cls._msg_factories[cls.__msgtype__.value] = cls
         except AttributeError:
             cls._msg_factories = {}

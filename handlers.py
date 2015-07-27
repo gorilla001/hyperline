@@ -11,7 +11,8 @@ import logging
 
 from session import SessionManager
 from mongodb import MongoProxy
-from messages import Message
+from messages import Message, MessageType
+
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +53,8 @@ class Register(MessageHandler):
         {'type': 'register', 'uid': 'unique-user-id'}
 
     """
-    __msgtype__ = 'register'
+    # __msgtype__ = 'register'
+    __msgtype__ = MessageType.register
 
     @asyncio.coroutine
     def handle(self, msg, session):
@@ -117,7 +119,7 @@ class Register(MessageHandler):
             try:
                 # Normal Socket use method `write` to send message, while Web Socket use method `send`
                 # For Web Socket, just send raw message
-                # FIXME
+                # FIXME: try to determine session type by session attribute
                 if hasattr(session.transport, 'write'):
                     # Pack message as length-prifixed and send to receiver.
                     session.write(msg)
@@ -136,7 +138,8 @@ class SendTextMsg(MessageHandler):
         {'type': 'text', 'sender': 'Jack', 'receiver': 'Rose', 'content': 'I love you forever'}
 
     """
-    __msgtype__ = 'message'  # Text message
+    # __msgtype__ = 'message'  # Text message
+    __msgtype__ = MessageType.message
 
     @asyncio.coroutine
     def handle(self, msg, session):
@@ -198,7 +201,8 @@ class Unregister(MessageHandler):
         {'type': 'unregister', 'uid': 'unique-user-id'}
 
     """
-    __msgtype__ = 'unregister'
+    # __msgtype__ = 'unregister'
+    __msgtype__ = MessageType.unregister
 
     @asyncio.coroutine
     def handle(self, msg, session):
