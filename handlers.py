@@ -256,7 +256,6 @@ class RequestForService(MessageHandler):
             custom_service = self._session_manager.get_sessions().pop()
             # message = {'type': 'reply', 'body': {'status': 200, 'content': custom_service}}
             ready_message = ReadyMessage()
-            ready_message.status = 200
             ready_message.uid = custom_service.uid
             ready_message.name = custom_service.name
 
@@ -284,7 +283,7 @@ class RequestForService(MessageHandler):
             yield from session.send(response_message)
 
 
-class ErorHandler(MessageHandler):
+class ErrorHandler(MessageHandler):
     """
     Unknown message type
     """

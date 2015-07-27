@@ -218,14 +218,13 @@ class ReadyMessage(object):
     """
     __msgtype__ = MessageType.ready
 
-    def __init__(self, status=None, uid=None, name=None):
-        self.status = status
+    def __init__(self, uid=None, name=None):
         self.uid = uid
         self.name = name
 
     @property
     def json(self):
-        return {'type': self.__msgtype__.value, 'body': {'status': self.status, 'uid': self.uid, 'name': self.name}}
+        return {'type': self.__msgtype__.value, 'body': {'uid': self.uid, 'name': self.name}}
 
 # Internal message
 class RegisterSucceed(object):
