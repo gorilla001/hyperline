@@ -244,8 +244,10 @@ class Session(object):
     """
 
     def __init__(self, timeout=1800):
-        self.client = None  # client id
+        self.uid = None  # client id
+        self.name = None  # client name
         self.role = None  # client role
+
         self.transport = None  # client connection
         self.service = None  # which service the client called
         self.target = []  # message target for this session

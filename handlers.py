@@ -67,7 +67,8 @@ class Register(MessageHandler):
         if user role is sports man, the session will be added into SportsManSessionManager.
 
         """
-        session.client = msg.uid
+        session.uid = msg.uid
+        session.name = msg.name
         session.role = msg.role
         # session.service = msg.service
 
