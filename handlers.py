@@ -11,7 +11,7 @@ import logging
 
 from session import SessionManager
 from mongodb import MongoProxy
-from messages import Message, MessageType, ReadyMessage, RegisterSucceed
+from messages import Message, MessageType, ReadyMessage, RegisterSucceed, RequestForServiceResponse
 
 
 logger = logging.getLogger(__name__)
@@ -255,10 +255,10 @@ class RequestForService(MessageHandler):
         try:
             custom_service = self._session_manager.get_sessions().pop()
             # message = {'type': 'reply', 'body': {'status': 200, 'content': custom_service}}
-            message = ReadyMessage()
-            message.status = 200
-            message.uid = custom_service.uid
-            message.name = custom_service.name
+            ready_message = ReadyMessage()
+            ready_message.status = 200
+            ready_message.uid = custom_service.uid
+            ready_message.name = custom_service.name
 
             # One custom service maybe has many customers
             custom_service.target.append(session)
@@ -267,16 +267,21 @@ class RequestForService(MessageHandler):
             session.target.append(custom_service)
 
             # Send ready message to custom service
-            yield from custom_service.send(message)
+            yield from custom_service.send(ready_message)
 
             # Send ready message to current user
-            yield from session.send(message)
+            response_message = RequestForServiceResponse()
+            response_message.status = 200
+            response_message.uid = custom_service.uid
+            response_message.name = custom_service.name
+
+            yield from session.send(response_message)
         except IndexError:
-            message = ReadyMessage()
-            message.status = 404
+            response_message = RequestForServiceResponse()
+            response_message.status = 404
 
             # Send error message to current user
-            yield from session.send(message)
+            yield from session.send(response_message)
 
 
 class ErorHandler(MessageHandler):

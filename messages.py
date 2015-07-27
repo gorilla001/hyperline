@@ -19,6 +19,7 @@ class MessageType(Enum):
 
     register_response = '11'
     request_service = '12'
+    request_service_response = '13'
 
 class MessageFormatError(Exception):
     def __init__(self, err_msg=None):
@@ -114,6 +115,21 @@ class RequestForService(Message):
     @property
     def json(self):
         return {'type': self.__msgtype__.value, 'body': {'content': self.content}}
+
+class RequestForServiceResponse(object):
+    """
+    Message: {'type': '13', body: {'status': 200, 'uid': self.uid, 'name': self.name}}
+    """
+    __msgtype__ = MessageType.request_service_response
+
+    def __init__(self, status=None, uid=None, name=None):
+        self.status = status
+        self.uid = uid
+        self.name = name
+
+    @property
+    def json(self):
+        return {'type': self.__msgtype__.value, 'body': {'status': self.status, 'uid': self.uid, 'name': self.name}}
 
 class TextMessage(Message):
     """
