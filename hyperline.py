@@ -60,7 +60,7 @@ class WSHyperLine(WSProtocol):
         """
         Populated session attribute `transport` with `ws` from connection
         """
-        logging.info('connected from {}'.format(connection.address))
+        logger.info('connected from {}'.format(connection.address))
 
         connection.session.transport = connection.ws
 
