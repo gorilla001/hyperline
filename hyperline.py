@@ -94,7 +94,7 @@ class WSHyperLine(WSProtocol):
     @asyncio.coroutine
     def connection_lost(self, connection):
         """Close connection and delete session from SessionManager"""
-        print('connection lost from {}'.format(connection.address))
+        logger.info('connection lost from {}'.format(connection.address))
 
         yield from connection.ws.close()
 
