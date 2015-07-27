@@ -14,7 +14,8 @@ class MessageType(Enum):
     register = '0'
     message = '1'
     unregister = '2'
-    reply = '3'
+    ready = '3'
+    reply = '4'
 
 class MessageFormatError(Exception):
     def __init__(self, err_msg=None):
@@ -172,6 +173,21 @@ class ReplyMessage(Message):
     def json(self):
         return {'type': self.__msgtype__, 'body': {'status': self.status, 'cs_id': self.cs_id}}
 
+
+class ReadyMessage(object):
+    """
+    Used for telling custom service and normal user start conversation.
+    """
+    __msgtype__ = MessageType.ready
+
+    def __init__(self, status=None, uid=None, name=None):
+        self.status = status
+        self.uid = uid
+        self.name = name
+
+    @property
+    def json(self):
+        return {'type': self.__msgtype__, 'body': {'status': self.status, 'uid': self.uid, 'name': self.name}}
 
 if __name__ == '__main__':
     _msg = {'type': 'register', 'uid': '123456', 'role': '0'}
