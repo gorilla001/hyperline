@@ -91,11 +91,10 @@ class Register(MessageHandler):
             message.name = custom_service.name
 
             # One custom service maybe has many customers
-            custom_service_session = self._session_manager.get_session(custom_service)
-            custom_service_session.target.append(session)
+            custom_service.target.append(session)
 
             # One customer has only one custom service
-            session.target.append(custom_service_session)
+            session.target.append(custom_service)
 
         except IndexError:
             # message = {'type': 'reply', 'body': {'status': 404, 'content': ''}}
