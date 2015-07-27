@@ -32,11 +32,11 @@ class MessageHandler(metaclass=MetaHandler):
 
     def handle(self, msg, session):
         try:
-            _handler = self._msg_handlers[msg.__msgtype__]
-        except KeyError:
-            return ErrorHandler().handle(msg)
-        except AttributeError:
-            return ErrorHandler().handle(msg)
+            _handler = self._msg_handlers[msg.__msgtype__.value]
+        except KeyError as exc:
+            return ErrorHandler().handle(exc)
+        except AttributeError as exc:
+            return ErrorHandler().handle(exc)
 
         # Handling messages in a asyncio-Task
         # Don’t directly create Task instances: use the async() function
