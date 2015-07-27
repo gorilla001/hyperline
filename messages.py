@@ -154,19 +154,19 @@ class ReplyMessage(Message):
     # __msgtype__ = 'reply'
     __msgtype__ = MessageType.reply
 
-    def __init__(self, status, cs_id):
+    def __init__(self, status, content):
         self.status = status
-        self.cs_id = cs_id
+        self.content = content
 
     @classmethod
     def factory(cls, msg):
         try:
             status = msg['status']
-            cs_id = msg['cs_id']
+            content = msg['content']
         except KeyError:
             raise MessageFormatError("Malformed msg {}".format(msg))
 
-        return cls(status, cs_id)
+        return cls(status, content)
 
     @property
     def json(self):
