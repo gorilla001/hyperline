@@ -256,8 +256,8 @@ class RequestForService(MessageHandler):
             custom_service = self._session_manager.get_sessions().pop()
             # message = {'type': 'reply', 'body': {'status': 200, 'content': custom_service}}
             ready_message = ReadyMessage()
-            ready_message.uid = custom_service.uid
-            ready_message.name = custom_service.name
+            ready_message.uid = session.uid
+            ready_message.name = session.name
 
             # One custom service maybe has many customers
             custom_service.target.append(session)
