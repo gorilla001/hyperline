@@ -3,6 +3,9 @@ __author__ = 'nmg'
 from meta import MetaMessage
 import time
 from enum import Enum
+import log as logging
+
+logger = logging.getLogger(__name__)
 
 class MessageType(Enum):
     """
@@ -33,9 +36,9 @@ class Message(metaclass=MetaMessage):
         try:
             return self._msg_factories[msg['type']].factory(msg['body'])
         except TypeError:
-            print("Malformed msg {}.".format(msg))
+            logging.error("Malformed msg {}.".format(msg))
         except KeyError:
-            print("Malformed msg {}.".format(msg))
+            logging.error("Malformed msg {}.".format(msg))
             # raise MessageFormatError("Malformed msg {}.".format(msg))
 
 class RegisterMessage(Message):

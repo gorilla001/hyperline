@@ -2,10 +2,8 @@ __author__ = 'nmg'
 
 import asyncio
 
-import logging
-
+import log as logging
 from session import Session
-
 from messages import MessageFormatError
 
 _MESSAGE_PREFIX_LENGTH = 4
@@ -115,7 +113,7 @@ class WSProtocol(object):
             try:
                 yield from self.message_received(message, connection)
             except MessageFormatError as exc:
-                print(exc)
+                logger.warn(exc)
                 # yield from self.connection_lost(connection)
                 # break
 

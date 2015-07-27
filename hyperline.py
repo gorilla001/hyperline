@@ -3,9 +3,7 @@ __author__ = 'nmg'
 import asyncio
 import json
 import websockets
-import ast
-import six
-import logging
+import log as logging
 
 from protocol import HyperLineProtocol
 from protocol import WSProtocol
@@ -62,7 +60,7 @@ class WSHyperLine(WSProtocol):
         """
         Populated session attribute `transport` with `ws` from connection
         """
-        print('connected from {}'.format(connection.address))
+        logging.info('connected from {}'.format(connection.address))
 
         connection.session.transport = connection.ws
 
