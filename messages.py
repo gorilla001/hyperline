@@ -16,8 +16,9 @@ class MessageType(Enum):
     unregister = '2'
     ready = '3'
     reply = '4'
-    register_succeed = '5'
-    register_failed = '6'
+
+    register_response = '11'
+    request_service = '12'
 
 class MessageFormatError(Exception):
     def __init__(self, err_msg=None):
@@ -88,14 +89,31 @@ class RegisterMessage(Message):
     def json(self):
         return {'type': self.__msgtype__, 'uid': self.uid, 'name': self.name, 'role': self.role}
 
-# class RequestMessage(Message):
-#     """
-#     Ask for specified service, such as custom service or sports man service.
-#
-#     Message should like this:
-#
-#     {'type': 'request', 'body': {'content':
-#     """
+class RequestMessage(Message):
+    """
+    Ask for specified service, such as custom service or sports man service.
+
+    Message should like this:
+
+    {'type': '12', 'body': {'content': '10'}}
+    """
+    __msgtype__ = MessageType.request_service
+
+    def __init__(self, content):
+        self.content = content
+
+    @classmethod
+    def factory(cls, msg):
+        try:
+            content = msg['content']
+        except KeyError:
+            raise MessageFormatError("Malformed msg {}".format(msg))
+
+        return cls(content)
+
+    @property
+    def json(self):
+        return {'type': self.__msgtype__.value, 'body': {'content': self.content}}
 
 class TextMessage(Message):
     """
@@ -193,13 +211,14 @@ class ReadyMessage(object):
     def json(self):
         return {'type': self.__msgtype__.value, 'body': {'status': self.status, 'uid': self.uid, 'name': self.name}}
 
+# Internal message
 class RegisterSucceed(object):
     """
     Used for register reply while register succeed.
 
-    Message : {"type": "5", body: { "status": 200 }}
+    Message: {'type': '5', body: {'status': 200}}
     """
-    __msgtype__ = MessageType.register_succeed
+    __msgtype__ = MessageType.register_response
 
     def __init__(self, status=200):
         self.status = status

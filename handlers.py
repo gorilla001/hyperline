@@ -246,7 +246,40 @@ class HeartBeat(MessageHandler):
         session = self._session_manager.get_session(msg.uid)
         session.touch()
 
-class ErrorHandler(MessageHandler):
+class Request(MessageHandler):
+
+    __msgtype__ = MessageType.request_service
+
+    @asyncio.coroutine
+    def handle(self, msg, session):
+        try:
+            custom_service = self._session_manager.get_sessions().pop()
+            # message = {'type': 'reply', 'body': {'status': 200, 'content': custom_service}}
+            message = ReadyMessage()
+            message.status = 200
+            message.uid = custom_service.uid
+            message.name = custom_service.name
+
+            # One custom service maybe has many customers
+            custom_service.target.append(session)
+
+            # One customer has only one custom service
+            session.target.append(custom_service)
+
+            # Send ready message to custom service
+            yield from custom_service.send(message)
+
+            # Send ready message to current user
+            yield from session.send(message)
+        except IndexError:
+            message = ReadyMessage()
+            message.status = 404
+
+            # Send error message to current user
+            yield from session.send(message)
+
+
+class ErorHandler(MessageHandler):
     """
     Unknown message type
     """
