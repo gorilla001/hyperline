@@ -89,7 +89,7 @@ class RegisterMessage(Message):
     def json(self):
         return {'type': self.__msgtype__, 'uid': self.uid, 'name': self.name, 'role': self.role}
 
-class RequestMessage(Message):
+class RequestForService(Message):
     """
     Ask for specified service, such as custom service or sports man service.
 

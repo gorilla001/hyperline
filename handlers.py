@@ -246,7 +246,7 @@ class HeartBeat(MessageHandler):
         session = self._session_manager.get_session(msg.uid)
         session.touch()
 
-class Request(MessageHandler):
+class RequestForService(MessageHandler):
 
     __msgtype__ = MessageType.request_service
 
