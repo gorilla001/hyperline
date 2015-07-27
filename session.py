@@ -149,7 +149,7 @@ class SessionManager(metaclass=MetaSession):
         """
         try:
             _session_manager = self._session_managers[service_id]
-            return list(_session_manager().sessions.keys())
+            return list(_session_manager().sessions.values())
         except KeyError:
             pass
 
