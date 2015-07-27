@@ -98,8 +98,19 @@ class Register(MessageHandler):
 
         except IndexError:
             # message = {'type': 'reply', 'body': {'status': 404, 'content': ''}}
+            message = ReadyMessage()
+            message.status = 404
 
-        yield from session.send(self._message(message))
+        yield from session.send(message)
+
+        # Send custom service for ready
+
+        message = ReadyMessage()
+        message.status = 200
+        message.uid = session.uid
+        message.name = session.name
+
+        yield from custom_service.send(message)
 
         # # Get offline msgs from db
         # offline_msgs = yield from self.get_offline_msgs(session)
