@@ -189,7 +189,7 @@ class ReadyMessage(object):
 
     @property
     def json(self):
-        return {'type': self.__msgtype__, 'body': {'status': self.status, 'uid': self.uid, 'name': self.name}}
+        return {'type': self.__msgtype__.value, 'body': {'status': self.status, 'uid': self.uid, 'name': self.name}}
 
 if __name__ == '__main__':
     _msg = {'type': 'register', 'uid': '123456', 'role': '0'}

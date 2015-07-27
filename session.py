@@ -132,7 +132,7 @@ class SessionManager(metaclass=MetaSession):
     def pop_session(self, session):
         try:
             _session_manager = self._session_managers[session.role]
-            _session_manager().pop_session(session.client)
+            _session_manager().pop_session(session.uid)
         except KeyError:
             pass
 
@@ -168,7 +168,7 @@ class NormalUserSessionManager(SessionManager):
         """
         Add session in SessionManager
         """
-        self.sessions[session.client] = session
+        self.sessions[session.uid] = session
 
     def pop_session(self, client):
         """
@@ -201,7 +201,7 @@ class CustomServiceSessionManager(SessionManager):
         """
         Add session in SessionManager
         """
-        self.sessions[session.client] = session
+        self.sessions[session.uid] = session
 
     def pop_session(self, client):
         """

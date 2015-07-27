@@ -101,16 +101,18 @@ class Register(MessageHandler):
             message = ReadyMessage()
             message.status = 404
 
-        yield from session.send(message)
+        if session.role != '10':
+            yield from session.send(message)
 
         # Send custom service for ready
 
-        message = ReadyMessage()
-        message.status = 200
-        message.uid = session.uid
-        message.name = session.name
+        if custom_service.role != '10':
+            message = ReadyMessage()
+            message.status = 200
+            message.uid = session.uid
+            message.name = session.name
 
-        yield from custom_service.send(message)
+            yield from custom_service.send(message)
 
         # # Get offline msgs from db
         # offline_msgs = yield from self.get_offline_msgs(session)
@@ -166,7 +168,7 @@ class SendTextMsg(MessageHandler):
         :return: None
         """
         for _session in session.target:
-            if _session.client == msg.recv:
+            if _session.uid == msg.recv:
                 if hasattr(_session.transport, 'write'):
                     # Pack message as length-prifixed and send to receiver.
                     _session.write(msg)
