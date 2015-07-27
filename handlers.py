@@ -11,7 +11,7 @@ import logging
 
 from session import SessionManager
 from mongodb import MongoProxy
-from messages import Message, MessageType, ReadyMessage
+from messages import Message, MessageType, ReadyMessage, RegisterSucceed
 
 
 logger = logging.getLogger(__name__)
@@ -72,47 +72,52 @@ class Register(MessageHandler):
         session.role = msg.role
         # session.service = msg.service
 
-        # Register user in global session
-        self._session_manager.add_session(session)
-
-        # Start session timer
-        session.add_timeout()
-
-        """
-        Choose service man from service session manager, and send back
-        service man's name and id to client.
-        """
         try:
-            custom_service = self._session_manager.get_sessions().pop()
-            # message = {'type': 'reply', 'body': {'status': 200, 'content': custom_service}}
-            message = ReadyMessage()
-            message.status = 200
-            message.uid = custom_service.uid
-            message.name = custom_service.name
+            # Register user in global session
+            self._session_manager.add_session(session)
+            # Start session timer
+            session.add_timeout()
 
-            # One custom service maybe has many customers
-            custom_service.target.append(session)
+            # Send successful reply
+            yield from session.send(RegisterSucceed())
+        except KeyError:
+            pass
 
-            # One customer has only one custom service
-            session.target.append(custom_service)
-
-        except IndexError:
-            # message = {'type': 'reply', 'body': {'status': 404, 'content': ''}}
-            message = ReadyMessage()
-            message.status = 404
-
-        if session.role != '10':
-            yield from session.send(message)
-
-        # Send custom service for ready
-
-        if custom_service.role != '10':
-            message = ReadyMessage()
-            message.status = 200
-            message.uid = session.uid
-            message.name = session.name
-
-            yield from custom_service.send(message)
+        # """
+        # Choose service man from service session manager, and send back
+        # service man's name and id to client.
+        # """
+        # try:
+        #     custom_service = self._session_manager.get_sessions().pop()
+        #     # message = {'type': 'reply', 'body': {'status': 200, 'content': custom_service}}
+        #     message = ReadyMessage()
+        #     message.status = 200
+        #     message.uid = custom_service.uid
+        #     message.name = custom_service.name
+        #
+        #     # One custom service maybe has many customers
+        #     custom_service.target.append(session)
+        #
+        #     # One customer has only one custom service
+        #     session.target.append(custom_service)
+        #
+        # except IndexError:
+        #     # message = {'type': 'reply', 'body': {'status': 404, 'content': ''}}
+        #     message = ReadyMessage()
+        #     message.status = 404
+        #
+        # if session.role != '10':
+        #     yield from session.send(message)
+        #
+        # # Send custom service for ready
+        #
+        # if custom_service.role != '10':
+        #     message = ReadyMessage()
+        #     message.status = 200
+        #     message.uid = session.uid
+        #     message.name = session.name
+        #
+        #     yield from custom_service.send(message)
 
         # # Get offline msgs from db
         # offline_msgs = yield from self.get_offline_msgs(session)

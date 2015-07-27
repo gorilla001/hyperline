@@ -16,6 +16,8 @@ class MessageType(Enum):
     unregister = '2'
     ready = '3'
     reply = '4'
+    register_succeed = '5'
+    register_failed = '6'
 
 class MessageFormatError(Exception):
     def __init__(self, err_msg=None):
@@ -190,6 +192,22 @@ class ReadyMessage(object):
     @property
     def json(self):
         return {'type': self.__msgtype__.value, 'body': {'status': self.status, 'uid': self.uid, 'name': self.name}}
+
+class RegisterSucceed(object):
+    """
+    Used for register reply while register succeed.
+
+    Message : {"type": "5", body: { "status": 200 }}
+    """
+    __msgtype__ = MessageType.register_succeed
+
+    def __init__(self, status=200):
+        self.status = status
+
+    @property
+    def json(self):
+        return {'type': self.__msgtype__.value, 'body': {'status': self.status}}
+
 
 if __name__ == '__main__':
     _msg = {'type': 'register', 'uid': '123456', 'role': '0'}
