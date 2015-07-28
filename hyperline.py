@@ -72,29 +72,17 @@ class WSHyperLine(WSProtocol):
         Decoding Json object to python dictionary. If it failed, send back the message and close connection.
         """
         try:
-            message = json.loads(message)  # If message is json object
+            message = json.loads(message)  # message is json object
         except ValueError:
             raise MessageFormatError('message is not json object')
+            return
 
         # Message format validate
         if {'type', 'body'} != set(message):
             raise MessageFormatError('type or body fields must be specified')
-        #     yield from connection.ws.send("Malformed message {}".format(message))
-        #     yield from connection.ws.close()
-        #     return
+            return
 
-        #     # if isinstance(message, six.text_type):
-        #     #     message = ast.literal_eval(message)
-        #     #
-        #     # if isinstance(message, six.binary_type):
-        #     #     message = json.loads(message.decode("utf-8"))
-        # logger.info("Send message {}".format(message))
-        # try:
-        #     message = self.message(message)
-        # except MessageFormatError:
-        #     logger.error("Malformed msg {}.".format(message))
-        #     return
-
+        logger.info("Send message {}".format(message))
         return self.handler.handle(self.message(message), connection.session)
 
     @asyncio.coroutine

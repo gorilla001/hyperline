@@ -162,6 +162,12 @@ class SessionManager(metaclass=MetaSession):
         except KeyError:
             pass
 
+    def send_notify(self):
+        """
+        Send notify to others.
+        """
+        raise NotImplementedError
+
 class NormalUserSessionManager(SessionManager):
     """
     Normal user session manager. normal users means external user.
