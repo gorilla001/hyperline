@@ -162,11 +162,11 @@ class SessionManager(metaclass=MetaSession):
         except KeyError:
             pass
 
-    def send_notify(self):
-        """
-        Send notify to others.
-        """
-        raise NotImplementedError
+    # def send_notify(self):
+    #     """
+    #     Send notify to others.
+    #     """
+    #     raise NotImplementedError
 
 class NormalUserSessionManager(SessionManager):
     """
@@ -328,6 +328,10 @@ class Session(object):
 
     def write(self, msg):
         self.transport.write(pack("!I", len(msg)) + bytes(msg, encoding='utf-8'))
+
+    @property
+    def is_websocket(self):
+        return hasattr(self.transport, 'send')
 
 
 if __name__ == '__main__':

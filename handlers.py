@@ -175,12 +175,12 @@ class SendTextMsg(MessageHandler):
         current_session = session
         _session = current_session.associated_sessions.get(int(msg.recv), None)
         if _session is not None:
-            if hasattr(_session.transport, 'write'):
-                # Pack message as length-prifixed and send to receiver.
-                _session.write(msg)
-            else:
+            if _session.is_websocket:
                 # Send raw message directly
                 yield from _session.send(msg)
+            else:
+                # Pack message as length-prifixed and send to receiver.
+                _session.write(msg)
 
         # try:
         #     _session = self._session_manager.get_session(msg.recv)

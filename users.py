@@ -11,17 +11,14 @@ class User(Enum):
     sport_man = 2
 
 
-class NormalUser(object):
+class User(object):
     """
     Every connection user map to one User object
     """
-    __usertype__ = User.normal_user
-
-    def __init__(self, uid=None, name=None, role=None, session=None):
-        self.uid = uid
-        self.name = name
-        self.role = role
-        self.session = session
+    def __init__(self, uid=None, name=None, role=None):
+        self._uid = uid
+        self._name = name
+        self._role = role
 
 
 class CustomService(object):
@@ -39,22 +36,3 @@ class CustomService(object):
 
     def __hash__(self):
         return id(self)
-
-
-
-
-
-
-
-
-
-if __name__ == '__main__':
-    cs = CustomService(uid='1234')
-    print(cs.__usertype__.value)
-
-    d = { cs : 'test'}
-
-    print(d)
-
-    print(d.get(cs))
-    print(cs == '1234')
