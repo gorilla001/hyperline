@@ -11,7 +11,7 @@ import logging
 
 from session import SessionManager
 from mongodb import MongoProxy
-from messages import Message, MessageType, ReadyMessage, RegisterSucceed, RegisterFailed, RequestForServiceResponse
+from messages import MessageType, RegisterSucceed, RegisterFailed, ReadyMessage, RequestForServiceResponse
 
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,6 @@ class MessageHandler(metaclass=MetaHandler):
     """
     _session_manager = SessionManager()
     _mongodb = MongoProxy()
-    _message = Message()
 
     def handle(self, msg, session):
         try:
@@ -53,8 +52,7 @@ class Register(MessageHandler):
         {'type': 'register', 'uid': 'unique-user-id'}
 
     """
-    # __msgtype__ = 'register'
-    __msgtype__ = MessageType.register
+    __msgtype__ = MessageType.REGISTER
 
     @asyncio.coroutine
     def handle(self, msg, session):
@@ -160,8 +158,7 @@ class SendTextMsg(MessageHandler):
         {'type': 'text', 'sender': 'Jack', 'receiver': 'Rose', 'content': 'I love you forever'}
 
     """
-    # __msgtype__ = 'message'  # Text message
-    __msgtype__ = MessageType.message
+    __msgtype__ = MessageType.MESSAGE
 
     @asyncio.coroutine
     def handle(self, msg, session):
@@ -224,8 +221,7 @@ class Unregister(MessageHandler):
         {'type': 'unregister', 'uid': 'unique-user-id'}
 
     """
-    # __msgtype__ = 'unregister'
-    __msgtype__ = MessageType.unregister
+    __msgtype__ = MessageType.UNREGISTER
 
     @asyncio.coroutine
     def handle(self, msg, session):
@@ -240,7 +236,7 @@ class HeartBeat(MessageHandler):
 
         {'type': 'heartbeat', 'uid': 'unique-user-id'}
     """
-    __msgtype__ = 'heartbeat'
+    __msgtype__ = MessageType.HEARTBEAT
 
     @asyncio.coroutine
     def handle(self, msg, _):
@@ -249,7 +245,7 @@ class HeartBeat(MessageHandler):
 
 class RequestForService(MessageHandler):
 
-    __msgtype__ = MessageType.request_service
+    __msgtype__ = MessageType.REQUEST_SERVICE
 
     @asyncio.coroutine
     def handle(self, msg, session):
@@ -287,8 +283,8 @@ class ErrorHandler(MessageHandler):
     """
     Unknown message type
     """
-    __msgtype__ = 'unknown'
+    __msgtype__ = MessageType.UNKNOWN
 
     def handle(self, msg):
-        print("Unknown message type: {}".format(msg))
+        logger.info("Unknown message type: {}".format(msg))
 

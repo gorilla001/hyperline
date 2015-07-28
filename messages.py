@@ -5,21 +5,33 @@ import time
 from enum import Enum
 import log as logging
 
+__all__ = ['MessageType',
+           'MessageFormatError',
+           'RegisterMessage',
+           'RegisterSucceed',
+           'RegisterFailed',
+           'RequestForService',
+           'RequestForServiceResponse',
+           'ReadyMessage']
+
 logger = logging.getLogger(__name__)
 
 class MessageType(Enum):
     """
     Message type
     """
-    register = '0'
-    message = '1'
-    unregister = '2'
-    ready = '3'
-    reply = '4'
+    REGISTER = '0'
+    MESSAGE = '1'
+    UNREGISTER = '2'
+    READY = '3'
+    REPLY = '4'
+    HEARTBEAT = '5'
 
-    register_response = '11'
-    request_service = '12'
-    request_service_response = '13'
+    REGISTER_RESPONSE = '11'
+    REQUEST_SERVICE = '12'
+    REQUEST_SERVICE_RESPONSE = '13'
+
+    UNKNOWN = '404'
 
 class MessageFormatError(Exception):
     def __init__(self, err_msg=None):
@@ -66,8 +78,7 @@ class RegisterMessage(Message):
         {'type':'register', 'body': { 'uid': '1234', 'name': 'name', 'role': '0'}}
     """
 
-    # __msgtype__ = 'register'
-    __msgtype__ = MessageType.register
+    __msgtype__ = MessageType.REGISTER
 
     def __init__(self, uid, name, role):
         self.uid = uid
@@ -97,7 +108,7 @@ class RequestForService(Message):
 
     {'type': '12', 'body': {'content': '10'}}
     """
-    __msgtype__ = MessageType.request_service
+    __msgtype__ = MessageType.REQUEST_SERVICE
 
     def __init__(self, content):
         self.content = content
@@ -119,7 +130,7 @@ class RequestForServiceResponse(object):
     """
     Message: {'type': '13', body: {'status': 200, 'uid': self.uid, 'name': self.name}}
     """
-    __msgtype__ = MessageType.request_service_response
+    __msgtype__ = MessageType.REQUEST_SERVICE_RESPONSE
 
     def __init__(self, status=None, uid=None, name=None):
         self.status = status
@@ -139,8 +150,7 @@ class TextMessage(Message):
     # {'type': '1', 'body': { 'recv': ' ', 'content': ' '}}
     {'type': '1', 'body': { 'uid': '', 'recv': ' ', 'content': ' '}}
     """
-    # __msgtype__ = 'message'  # Text message
-    __msgtype__ = MessageType.message
+    __msgtype__ = MessageType.MESSAGE
 
     def __init__(self, uid, recv, content, timestamp=None):
         self.uid = uid
@@ -166,8 +176,10 @@ class TextMessage(Message):
                 'body': {'uid': self.uid, 'recv': self.recv, 'content': self.content, 'timestamp': self.timestamp}}
 
 class UnregisterMessage(Message):
-    # __msgtype__ = 'unregister'
-    __msgtype__ = MessageType.unregister
+    """
+    For user logout or connection lost
+    """
+    __msgtype__ = MessageType.UNREGISTER
 
     def __init__(self, uid):
         self.uid = uid
@@ -190,8 +202,7 @@ class ReplyMessage(Message):
     {'type': 'reply', 'body': {'status': 200, 'content': 'message-content'}
 
     """
-    # __msgtype__ = 'reply'
-    __msgtype__ = MessageType.reply
+    __msgtype__ = MessageType.REPLY
 
     def __init__(self, status, content):
         self.status = status
@@ -216,7 +227,7 @@ class ReadyMessage(object):
     """
     Used for telling custom service and normal user start conversation.
     """
-    __msgtype__ = MessageType.ready
+    __msgtype__ = MessageType.READY
 
     def __init__(self, uid=None, name=None):
         self.uid = uid
@@ -233,7 +244,7 @@ class RegisterSucceed(object):
 
     Message: {'type': '5', body: {'status': 200}}
     """
-    __msgtype__ = MessageType.register_response
+    __msgtype__ = MessageType.REGISTER_RESPONSE
 
     def __init__(self, status=200):
         self.status = status
@@ -250,7 +261,7 @@ class RegisterFailed(object):
     Message: {'type': '5', 'body': {'status': 500, 'reason': ''}}
 
     """
-    __msgtype__ = MessageType.register_response
+    __msgtype__ = MessageType.REGISTER_RESPONSE
 
     def __init__(self, status=500, reason=''):
         self.status = status

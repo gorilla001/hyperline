@@ -266,8 +266,6 @@ class Session(object):
         self.role = None  # client role
 
         self.transport = None  # client connection
-        # self.service = None  # which service the client called
-        # self.target = []  # message target for this session
         self.associated_sessions = {}
 
         self.timeout = timeout
