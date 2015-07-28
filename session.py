@@ -140,12 +140,17 @@ class SessionManager(metaclass=MetaSession):
         except KeyError:
             pass
 
-    def get_session(self, client, service_id='10'):
-        try:
-            _session_manager = self._session_managers[service_id]
-            return _session_manager().get_session(client)
-        except KeyError:
-            pass
+    def get_session(self, client):
+        # try:
+        #     _session_manager = self._session_managers[service_id]
+        #     return _session_manager().get_session(client)
+        # except KeyError:
+        #     pass
+        for _session_manager in self._session_managers:
+            session = _session_manager().get_session(client)
+            if session is None:
+                continue
+            return session
 
     def get_sessions(self, service_id='10'):
         """
@@ -255,9 +260,12 @@ class Session(object):
         self.transport = None  # client connection
         # self.service = None  # which service the client called
         # self.target = []  # message target for this session
+        self.associated_sessions = {}
+
         self.timeout = timeout
         self._loop = asyncio.get_event_loop()
         self._timeout_handler = None
+
         self.manager = SessionManager()
 
     def add_timeout(self, timeout=None):
