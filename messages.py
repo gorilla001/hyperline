@@ -242,6 +242,23 @@ class RegisterSucceed(object):
     def json(self):
         return {'type': self.__msgtype__.value, 'body': {'status': self.status}}
 
+# Internal message
+class RegisterFailed(object):
+    """
+    Used for reply while register failed.
+
+    Message: {'type': '5', 'body': {'status': 500, 'reason': ''}}
+
+    """
+    __msgtype__ = MessageType.register_response
+
+    def __init__(self, status=500, reason=''):
+        self.status = status
+        self.reason = reason
+
+    @property
+    def json(self):
+        return {'type': self.__msgtype__.value, 'body': {'status': 500, 'reason': self.reason}}
 
 if __name__ == '__main__':
     _msg = {'type': 'register', 'uid': '123456', 'role': '0'}

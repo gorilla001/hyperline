@@ -11,7 +11,7 @@ import logging
 
 from session import SessionManager
 from mongodb import MongoProxy
-from messages import Message, MessageType, ReadyMessage, RegisterSucceed, RequestForServiceResponse
+from messages import Message, MessageType, ReadyMessage, RegisterSucceed, RegisterFailed, RequestForServiceResponse
 
 
 logger = logging.getLogger(__name__)
@@ -80,8 +80,8 @@ class Register(MessageHandler):
 
             # Send successful reply
             yield from session.send(RegisterSucceed())
-        except KeyError:
-            pass
+        except KeyError as exc:
+            yield from session.send(RegisterFailed(reason=str(exc)))
 
         # """
         # Choose service man from service session manager, and send back
