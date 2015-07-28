@@ -303,7 +303,7 @@ class Session(object):
         """
         When session explode, it will delete itself from SessionManager.
         """
-        self.manager.pop_session(self.uid)
+        self.manager.pop_session(self)
 
     def close(self):
         """

@@ -69,7 +69,7 @@ class Register(MessageHandler):
         """
         session.uid = msg.uid
         session.name = msg.name
-        # session.role = msg.role
+        session.role = msg.role
         # session.service = msg.service
 
         try:
