@@ -257,6 +257,8 @@ class Session(object):
     Session object is used for managing connection(transport). After `timeout` seconds, and
     has no `touch` called, the connection will be closed.
     """
+    __slots__ = ['uid', 'name', 'role', 'transport', 'associated_sessions',
+                 'timeout', '_loop', '_timeout_handler', 'manager']
 
     def __init__(self, timeout=1800):
         self.uid = None  # client id
