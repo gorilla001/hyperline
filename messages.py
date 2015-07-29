@@ -75,30 +75,29 @@ class RegisterMessage(Message):
         # #           1 - chat with custom service
         # #           2 - chat which sports man
 
-        {'type':'register', 'body': { 'uid': '1234', 'name': 'name', 'role': '0'}}
+        # {'type':'register', 'body': { 'uid': '1234', 'name': 'name', 'role': '0'}}
+        {'type':'register', 'body': {'uid': '1234', 'name': 'name'}}
     """
 
     __msgtype__ = MessageType.REGISTER
 
-    def __init__(self, uid, name, role):
+    def __init__(self, uid, name):
         self.uid = uid
         self.name = name
-        self.role = role
 
     @classmethod
     def factory(cls, msg):
         try:
             uid = msg['uid']
             name = msg['name']
-            role = msg['role']
         except KeyError:
             raise MessageFormatError("Malformed msg {}".format(msg))
 
-        return cls(uid, name, role)
+        return cls(uid, name)
 
     @property
     def json(self):
-        return {'type': self.__msgtype__, 'uid': self.uid, 'name': self.name, 'role': self.role}
+        return {'type': self.__msgtype__, 'uid': self.uid, 'name': self.name}
 
 class RequestForService(Message):
     """

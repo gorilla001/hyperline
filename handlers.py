@@ -9,7 +9,8 @@ import asyncio
 import json
 import logging
 
-from session import SessionManager
+# from session import SessionManager
+from managers import NormalUserConnectionManager, CustomServiceConnectionManager
 from mongodb import MongoProxy
 from messages import MessageType, RegisterSucceed, RegisterFailed, ReadyMessage, RequestForServiceResponse
 
@@ -26,10 +27,10 @@ class MessageHandler(metaclass=MetaHandler):
     The points is that the class variables are shared between instances. so don't worried
     for different session and mongodb.
     """
-    _session_manager = SessionManager()
+    # _session_manager = SessionManager()
     _mongodb = MongoProxy()
 
-    def handle(self, msg, session):
+    def handle(self, msg, connection):
         try:
             _handler = self._msg_handlers[msg.__msgtype__.value]
         except KeyError as exc:
@@ -41,7 +42,7 @@ class MessageHandler(metaclass=MetaHandler):
         # Don’t directly create Task instances: use the async() function
         # or the BaseEventLoop.create_task() method.
 
-        return asyncio.async(_handler().handle(msg, session))
+        return asyncio.async(_handler().handle(msg, connection))
 
 class Register(MessageHandler):
     """
@@ -55,7 +56,7 @@ class Register(MessageHandler):
     __msgtype__ = MessageType.REGISTER
 
     @asyncio.coroutine
-    def handle(self, msg, session):
+    def handle(self, msg, connection):
 
         """
         Register user in session manager.
@@ -65,57 +66,24 @@ class Register(MessageHandler):
         if user role is sports man, the session will be added into SportsManSessionManager.
 
         """
-        session.uid = msg.uid
-        session.name = msg.name
-        session.role = msg.role
-        # session.service = msg.service
+        connection.uid = msg.uid
+        connection.name = msg.name
+
+        if connection.path == '/service':
+            _connection_manager = CustomServiceConnectionManager()
+        else:
+            _connection_manager = NormalUserConnectionManager()
 
         try:
-            # Register user in global session
-            self._session_manager.add_session(session)
-            # Start session timer
-            session.add_timeout()
+            # Register user in global connection
+            _connection_manager.add_connection(connection)
+            # Start connection timer
+            connection.add_timeout()
 
             # Send successful reply
-            yield from session.send(RegisterSucceed())
+            yield from connection.send(RegisterSucceed())
         except KeyError as exc:
-            yield from session.send(RegisterFailed(reason=str(exc)))
-
-        # """
-        # Choose service man from service session manager, and send back
-        # service man's name and id to client.
-        # """
-        # try:
-        #     custom_service = self._session_manager.get_sessions().pop()
-        #     # message = {'type': 'reply', 'body': {'status': 200, 'content': custom_service}}
-        #     message = ReadyMessage()
-        #     message.status = 200
-        #     message.uid = custom_service.uid
-        #     message.name = custom_service.name
-        #
-        #     # One custom service maybe has many customers
-        #     custom_service.target.append(session)
-        #
-        #     # One customer has only one custom service
-        #     session.target.append(custom_service)
-        #
-        # except IndexError:
-        #     # message = {'type': 'reply', 'body': {'status': 404, 'content': ''}}
-        #     message = ReadyMessage()
-        #     message.status = 404
-        #
-        # if session.role != '10':
-        #     yield from session.send(message)
-        #
-        # # Send custom service for ready
-        #
-        # if custom_service.role != '10':
-        #     message = ReadyMessage()
-        #     message.status = 200
-        #     message.uid = session.uid
-        #     message.name = session.name
-        #
-        #     yield from custom_service.send(message)
+            yield from connection.send(RegisterFailed(reason=str(exc)))
 
         # # Get offline msgs from db
         # offline_msgs = yield from self.get_offline_msgs(session)
@@ -124,12 +92,12 @@ class Register(MessageHandler):
         # yield from self.send_offline_msgs(offline_msgs, session)
 
     @asyncio.coroutine
-    def get_offline_msgs(self, session):
+    def get_offline_msgs(self, connection):
         # Get offline msg from mongodb.
-        return self._mongodb.get_msgs(receiver=session.client)
+        return self._mongodb.get_msgs(receiver=connection.uid)
 
     @asyncio.coroutine
-    def send_offline_msgs(self, offline_msgs, session):
+    def send_offline_msgs(self, offline_msgs, connection):
         """
         Send offline msgs to current user
         """
@@ -139,13 +107,13 @@ class Register(MessageHandler):
             try:
                 # Normal Socket use method `write` to send message, while Web Socket use method `send`
                 # For Web Socket, just send raw message
-                # FIXME: try to determine session type by session attribute
-                if hasattr(session.transport, 'write'):
+                # FIXME: try to determine connection type by connection attribute
+                if hasattr(connection.transport, 'write'):
                     # Pack message as length-prifixed and send to receiver.
-                    session.write(msg)
+                    connection.write(msg)
                 else:
                     # Send raw message directly
-                    session.send(msg)
+                    connection.send(msg)
             except Exception:
                 raise
 
@@ -161,7 +129,7 @@ class SendTextMsg(MessageHandler):
     __msgtype__ = MessageType.MESSAGE
 
     @asyncio.coroutine
-    def handle(self, msg, session):
+    def handle(self, msg, connection):
         """
         Send message to receiver if receiver is online, and
         save message to mongodb. Otherwise save
@@ -169,8 +137,8 @@ class SendTextMsg(MessageHandler):
         :param msg: message to send
         :return: None
         """
-        current_session = session
-        _session = current_session.associated_sessions.get(int(msg.recv), None)
+        current_connection = connection
+        _session = current_connection.associated_sessions.get(int(msg.recv), None)
         if _session is not None:
             if _session.is_websocket:
                 # Send raw message directly
@@ -224,9 +192,14 @@ class Unregister(MessageHandler):
     __msgtype__ = MessageType.UNREGISTER
 
     @asyncio.coroutine
-    def handle(self, msg, session):
+    def handle(self, msg, connection):
         """Unregister user record from global session"""
-        self._session_manager.pop_session(session)
+        if connection.path == '/service':
+            _connection_manager = CustomServiceConnectionManager()
+        else:
+            _connection_manager = NormalUserConnectionManager()
+
+        _connection_manager.pop_connection(connection.uid)
 
 class HeartBeat(MessageHandler):
     """
@@ -248,14 +221,14 @@ class RequestForService(MessageHandler):
     __msgtype__ = MessageType.REQUEST_SERVICE
 
     @asyncio.coroutine
-    def handle(self, msg, session):
+    def handle(self, msg, connection):
         try:
-            current_session = session
-            custom_service = self._session_manager.get_sessions().pop()
+            current_connection = connection
+            custom_service = CustomServiceConnectionManager().get_connections().pop()
             # message = {'type': 'reply', 'body': {'status': 200, 'content': custom_service}}
             ready_message = ReadyMessage()
-            ready_message.uid = session.uid
-            ready_message.name = session.name
+            ready_message.uid = current_connection.uid
+            ready_message.name = current_connection.name
 
             # Send ready message to custom service
             yield from custom_service.send(ready_message)
@@ -266,17 +239,17 @@ class RequestForService(MessageHandler):
             response_message.uid = custom_service.uid
             response_message.name = custom_service.name
 
-            yield from current_session.send(response_message)
+            yield from current_connection.send(response_message)
 
             # Session bind
-            custom_service.associated_sessions[session.uid] = session
-            current_session.associated_sessions[custom_service.uid] = custom_service
+            custom_service.associated_sessions[current_connection.uid] = current_connection
+            current_connection.associated_sessions[custom_service.uid] = custom_service
         except IndexError:
             response_message = RequestForServiceResponse()
             response_message.status = 404
 
             # Send error message to current user
-            yield from session.send(response_message)
+            yield from current_connection.send(response_message)
 
 
 class ErrorHandler(MessageHandler):

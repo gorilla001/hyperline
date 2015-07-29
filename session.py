@@ -29,150 +29,57 @@ class SessionManager(metaclass=MetaSession):
     . send notify
 
     """
-    # def __init__(self):
-    #
-    # #     self.manager = Manager()
-    # #
-    # #     self._loop = asyncio.get_event_loop()
-    #     self.interval = 2.0
-    #     self.timeout = timeout
-    #     self.looping_call()
-    #
-    # def looping_call(self):
-    #     self._loop.call_later(self.interval, self.check_expire)
-    #
-    # def add_session(self, session):
-    #     """
-    #     Add session in SessionManager
-    #     """
-    #     self.manager.add_session(session)
-    #     # self.sessions[session.client] = session
-    #
-    # def pop_session(self, client):
-    #     """
-    #     Delete session from SessionManager
-    #     """
-    #     self.manager.pop(client)
-    #
-    # def get_session(self, client):
-    #     # Get session associated by client if exists.
-    #
-    #     return self.manager.get_session(client)
-    #
-    # def get_manager(self, session):
-    #     return self._session_manager[session.role]
 
-    # def add_timeout(self, client):
-    #     """
-    #     Add timeout for session associated by client.
-    #     """
-    #     session = self.get_session(client)
-    #     session._timeout_handler = self._loop.call_later(
-    #         self.timeout, functools.partial(self.timeout_handler, client))
-
-    # def cancel_timeout(self, client):
-    #     """
-    #     Cancel timeout for session associated by client.
-    #     """
-    #     session = self.get_session(client)
-    #     session._timeout_handler.cancel()
-    #     session._timeout_handler = None
-    #
-    # def touch(self, client):
-    #     """
-    #     Cancel timeout handler and re-add handler. The client will call `touch` for
-    #     next timeout.
-    #
-    #     Every `heartbeat` message received or every `chat` message received, the session
-    #     will be touched.
-    #     """
-    #     self.cancel_timeout(client)
-    #     self.add_timeout(client)
-    #
-    # def timeout_handler(self, client):
-    #     # Close connection
-    #     self.get_session(client).close()
-    #
-    #     # Delete self from SessionManager
-    #     self.explode(client)
-
-    # def explode(self, client):
-    #     """
-    #     Delete session from SessionManager
-    #     """
-    #     self.pop_session(client)
-    # def send_notify(self, client, online=True):
-    #     """
-    #     Send online or offline messages to all clients include me.
-    #
-    #     Message body should like this:
-    #
-    #         {'type': 'notify', 'content': notify-types}
-    #
-    #     The notify types have the following values:
-    #
-    #        0 - online
-    #        1 - offline
-    #        (continue...)
-    #     """
-    #     for client in self.sessions.keys():
-    #         pass
-    #
-    # def check_expire(self):
-    #     print(self.sessions)
-    #     self.looping_call()
-    #
-    # def __repr__(self):
-    #     return "{}".format(self.sessions)
-    #
-    # __str__ = __repr__
     def add_session(self, session):
-        try:
-            _session_manager = self._session_managers[session.role]
-            _session_manager().add_session(session)
-        except KeyError:
-            pass
+        raise NotImplementedError()
 
-    def pop_session(self, session):
-        try:
-            _session_manager = self._session_managers[session.role]
-            _session_manager().pop_session(session.uid)
-        except KeyError:
-            pass
+    def pop_session(self, user_id):
+        raise NotImplementedError()
 
-    def get_session(self, client):
-        # try:
-        #     _session_manager = self._session_managers[service_id]
-        #     return _session_manager().get_session(client)
-        # except KeyError:
-        #     pass
-        for _session_manager in self._session_managers:
-            session = _session_manager().get_session(client)
-            if session is None:
-                continue
-            return session
+    def get_session(self, user_id):
+        raise NotImplementedError()
 
-    def get_sessions(self, service_id='10'):
-        """
-        Get all session clients from session manager specified by service_id
-        """
-        try:
-            _session_manager = self._session_managers[service_id]
-            return list(_session_manager().sessions.values())
-        except KeyError:
-            pass
-
-    # def send_notify(self):
-    #     """
-    #     Send notify to others.
-    #     """
-    #     raise NotImplementedError
 
 class NormalUserSessionManager(SessionManager):
     """
     Normal user session manager. normal users means external user.
     """
     __type__ = '0'
+
+    def __init__(self):
+        self.sessions = {}
+        self._loop = asyncio.get_event_loop()
+        self.looping_call()
+
+    def add_session(self, session):
+        """
+        Add session in SessionManager
+        """
+        self.sessions[session.uid] = session
+
+    def pop_session(self, user_id):
+        """
+        Delete session from SessionManager
+        """
+        self.sessions.pop(user_id)
+
+    def get_session(self, user_id):
+        # Get session associated by client if exists.
+
+        return self.sessions.get(user_id)
+
+    def looping_call(self):
+        self._loop.call_later(5.0, self.check_expire)
+
+    def check_expire(self):
+        print(self.sessions)
+        self.looping_call()
+#
+class CustomServiceSessionManager(SessionManager):
+    """
+    Custom service session manager
+    """
+    __type__ = '10'
 
     def __init__(self):
         self.sessions = {}
@@ -193,8 +100,11 @@ class NormalUserSessionManager(SessionManager):
 
     def get_session(self, client):
         # Get session associated by client if exists.
-
         return self.sessions.get(client)
+
+    def get_sessions(self):
+        # Get all sessions
+        return list(self.sessions.values())
 
     def looping_call(self):
         self._loop.call_later(5.0, self.check_expire)
@@ -202,68 +112,44 @@ class NormalUserSessionManager(SessionManager):
     def check_expire(self):
         print(self.sessions)
         self.looping_call()
-
-class CustomServiceSessionManager(SessionManager):
-    """
-    Custom service session manager
-    """
-    __type__ = '10'
-
-    def __init__(self):
-        self.sessions = {}
-
-    def add_session(self, session):
-        """
-        Add session in SessionManager
-        """
-        self.sessions[session.uid] = session
-
-    def pop_session(self, client):
-        """
-        Delete session from SessionManager
-        """
-        self.sessions.pop(client)
-
-    def get_session(self, client):
-        # Get session associated by client if exists.
-        return self.sessions.get(client)
-
-class SportManSessionManager(SessionManager):
-    """
-    Sport man session manager
-    """
-    def __init__(self):
-        self.sessions = {}
-
-    def add_session(self, client, session):
-        """
-        Add session in SessionManager
-        """
-        self.sessions[client] = session
-
-    def pop_session(self, client):
-        """
-        Delete session from SessionManager
-        """
-        self.sessions.pop(client)
-
-    def get_session(self, client):
-        # Get session associated by client if exists.
-
-        return self.sessions.get(client)
+#
+# class SportManSessionManager(SessionManager):
+#     """
+#     Sport man session manager
+#     """
+#     def __init__(self):
+#         self.sessions = {}
+#
+#     def add_session(self, client, session):
+#         """
+#         Add session in SessionManager
+#         """
+#         self.sessions[client] = session
+#
+#     def pop_session(self, client):
+#         """
+#         Delete session from SessionManager
+#         """
+#         self.sessions.pop(client)
+#
+#     def get_session(self, client):
+#         # Get session associated by client if exists.
+#
+#         return self.sessions.get(client)
 
 class Session(object):
     """
     Session object is used for managing connection(transport). After `timeout` seconds, and
     has no `touch` called, the connection will be closed.
     """
-    __slots__ = ['uid', 'name', 'role', 'transport', 'associated_sessions',
+    __slots__ = ['uid', 'name', 'role', 'path', 'transport', 'associated_sessions',
                  'timeout', '_loop', '_timeout_handler', 'manager']
 
     def __init__(self, timeout=1800):
         self.uid = None  # client id
         self.name = None  # client name
         self.role = None  # client role
+        self.path = None
 
         self.transport = None  # client connection
         self.associated_sessions = {}

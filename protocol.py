@@ -1,11 +1,15 @@
 __author__ = 'nmg'
 
 import asyncio
+import websockets
+from struct import pack
+import json
 
 import log as logging
-from session import Session
+# from session import Session
 from messages import MessageFormatError
-from collections import namedtuple
+# from collections import namedtuple
+from managers import NormalUserConnectionManager, CustomServiceConnectionManager
 
 _MESSAGE_PREFIX_LENGTH = 4
 
@@ -76,6 +80,92 @@ class HyperLineProtocol(asyncio.Protocol):
         """
         raise NotImplementedError()
 
+class Connection(object):
+    """
+    Connection object is used for managing connection(transport). After `timeout` seconds, and
+    has no `touch` called, the connection will be closed.
+    """
+    __slots__ = ['uid', 'name', 'role', 'path', 'transport', 'associated_sessions',
+                 'timeout', '_loop', '_timeout_handler', 'manager']
+
+    def __init__(self, ws, path, timeout=1800):
+        self.uid = None  # client id
+        self.name = None  # client name
+
+        self.path = path
+        self.transport = ws  # client connection
+
+        self.associated_sessions = {}
+
+        self.timeout = timeout
+        self._loop = asyncio.get_event_loop()
+        self._timeout_handler = None
+
+    def add_timeout(self, timeout=None):
+        if timeout is None:
+            timeout = self.timeout
+
+        self._timeout_handler = self._loop.call_later(timeout, self.timeout_handler)
+
+    def timeout_handler(self):
+        # Close connection
+        asyncio.async(self.transport.close())
+
+        # Delete self from SessionManager
+        self.explode()
+
+    def cancel_timeout(self):
+        """
+        Cancel timeout handler. So the close_connection action will not be acted.
+        """
+        self._timeout_handler.cancel()
+        self._timeout_handler = None
+
+    def touch(self):
+        """
+        Cancel timeout handler and re-add handler. The client will call `touch` for
+        next timeout.
+
+        Every `heartbeat` message received or every `chat` message received, the session
+        will be touched.
+        """
+        self.cancel_timeout()
+        self.add_timeout()
+
+    def explode(self):
+        """
+        When session explode, it will delete itself from SessionManager.
+        """
+        if self.path == '/service':
+            _connection_manager = CustomServiceConnectionManager()
+        else:
+            _connection_manager = NormalUserConnectionManager()
+
+        _connection_manager.pop_connection(self.uid)
+
+    @asyncio.coroutine
+    def close(self):
+        """
+        Close Session connection
+        """
+        asyncio.async(self.transport.close())
+        self.transport = None
+
+    @asyncio.coroutine
+    def send(self, msg):
+        # yield from self.transport.send(json.dumps(msg))
+        try:
+            yield from self.transport.send(json.dumps(msg.json))
+        except websockets.exceptions.InvalidState as exc:
+            logger.error("Send message failed! {}".format(exc))
+
+    def write(self, msg):
+        self.transport.write(pack("!I", len(msg)) + bytes(msg, encoding='utf-8'))
+
+    @property
+    def is_websocket(self):
+        return hasattr(self.transport, 'send')
+
 
 # class Connection(object):
 #     def __init__(self, ws, session):
@@ -85,7 +175,7 @@ class HyperLineProtocol(asyncio.Protocol):
 #     @property
 #     def address(self):
 #         return "{}:{}".format(self.ws.host, self.ws.port)
-Connection = namedtuple('Connection', ['ws', 'session'])
+# Connection = namedtuple('Connection', ['ws', 'path', 'session'])
 
 class WSProtocol(object):
     """
@@ -98,9 +188,9 @@ class WSProtocol(object):
     the other is request URI.(ignored in this place)
     """
     @asyncio.coroutine
-    def __call__(self, ws, _):
+    def __call__(self, ws, path):
 
-        connection = Connection(ws, Session())
+        connection = Connection(ws, path)
 
         yield from self.connection_made(connection)
 
@@ -146,3 +236,10 @@ class WSProtocol(object):
         @return: None
         """
         logger.info('connection lost')
+
+        yield from connection.close()
+
+        if connection.path == '/service':
+            CustomServiceConnectionManager().pop_connection(connection.uid)
+        else:
+            NormalUserConnectionManager().pop_connection(connection.uid)

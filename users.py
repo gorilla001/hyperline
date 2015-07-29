@@ -1,8 +1,9 @@
 __author__ = 'nmg'
 
 from enum import Enum
+import json
 
-class User(Enum):
+class UserType(Enum):
     """
     Identified user type
     """
@@ -25,7 +26,7 @@ class CustomService(object):
     """
     Every custom service map to one CustomService object
     """
-    __usertype__ = User.custom_service
+    __usertype__ = UserType.custom_service
 
     def __init__(self, uid=None, name=None):
         self.uid = uid
@@ -36,3 +37,7 @@ class CustomService(object):
 
     def __hash__(self):
         return id(self)
+
+if __name__ == '__main__':
+    user = User()
+    print(json.loads(user))

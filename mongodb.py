@@ -4,7 +4,7 @@ __author__ = 'nmg'
 __all__ = ['MongoProxy']
 
 from pymongo import MongoClient
-import pymongo.errors.ConnectionFailure
+from pymongo.errors import ConnectionFailure
 import log as logging
 import asyncio
 import sys
@@ -27,6 +27,7 @@ class MongoProxy(object):
         self.connect()
 
     def connect(self):
+        print('connect')
         # attempt = 0
         # while True:
         #     attempt += 1
@@ -42,7 +43,7 @@ class MongoProxy(object):
             try:
                 self._connect()
                 return
-            except pymongo.errors.ConnectionFailure:
+            except ConnectionFailure:
                 logger.info("Connecting to MongoDB failed...retry")
 
             if attempt >= self.max_retries:
