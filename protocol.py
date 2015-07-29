@@ -5,6 +5,7 @@ import asyncio
 import log as logging
 from session import Session
 from messages import MessageFormatError
+from collections import namedtuple
 
 _MESSAGE_PREFIX_LENGTH = 4
 
@@ -75,14 +76,16 @@ class HyperLineProtocol(asyncio.Protocol):
         """
         raise NotImplementedError()
 
-class Connection(object):
-    def __init__(self, ws, session):
-        self.ws = ws
-        self.session = session
 
-    @property
-    def address(self):
-        return "{}:{}".format(self.ws.host, self.ws.port)
+# class Connection(object):
+#     def __init__(self, ws, session):
+#         self.ws = ws
+#         self.session = session
+#
+#     @property
+#     def address(self):
+#         return "{}:{}".format(self.ws.host, self.ws.port)
+Connection = namedtuple('Connection', ['ws', 'session'])
 
 class WSProtocol(object):
     """

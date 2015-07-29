@@ -60,7 +60,7 @@ class WSHyperLine(WSProtocol):
         """
         Populated session attribute `transport` with `ws` from connection
         """
-        logger.info('connected from {}'.format(connection.address))
+        logger.info('New connection made')
 
         connection.session.transport = connection.ws
 
@@ -88,7 +88,7 @@ class WSHyperLine(WSProtocol):
     @asyncio.coroutine
     def connection_lost(self, connection):
         """Close connection and delete session from SessionManager"""
-        logger.info('connection lost from {}'.format(connection.address))
+        logger.info('Connection lost')
 
         yield from connection.ws.close()
 
