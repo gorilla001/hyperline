@@ -27,16 +27,6 @@ class MongoProxy(object):
         self.connect()
 
     def connect(self):
-        print('connect')
-        # attempt = 0
-        # while True:
-        #     attempt += 1
-        #     try:
-        #         self.connection = MongoClient(self.host, self.port)
-        #     except pymongo.errors.ConnectionFailure as exc:
-        #         if attempt >= self.max_retries:
-        #             logger.error("Connected mongodb error: {}".format(exc))
-
         attempt = 0
         while True:
             attempt += 1
