@@ -188,9 +188,9 @@ class SendTextMsg(MessageHandler):
                 # Pack message as length-prifixed and send to receiver.
                 _session.write(msg)
 
-            return asyncio.async(self.save_message(msg))
+            return asyncio.async(self.save_message(msg.json))
 
-        return asyncio.async(self.save_message(msg, online=False))
+        return asyncio.async(self.save_message(msg.json, online=False))
 
         # try:
         #     _session = self._session_manager.get_session(msg.recv)
@@ -223,6 +223,7 @@ class SendTextMsg(MessageHandler):
         status = {'status': int(online)}
         msg.update(status)
 
+        logger.info("Save msg in mongodb {}".format(msg))
         self._mongodb.save_msg(msg)
 
 class Unregister(MessageHandler):
