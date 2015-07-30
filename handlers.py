@@ -180,8 +180,6 @@ class SendTextMsg(MessageHandler):
             _connection_manager = NormalUserConnectionManager()
 
         _session = _connection_manager.get_connection(int(msg.recv))
-        print(_connection_manager)
-        print(_session)
         if _session is not None:
             if _session.is_websocket:
                 # Send raw message directly

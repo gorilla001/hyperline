@@ -85,7 +85,7 @@ class Connection(object):
     Connection object is used for managing connection(transport). After `timeout` seconds, and
     has no `touch` called, the connection will be closed.
     """
-    __slots__ = ['uid', 'name', 'role', 'path', 'transport', 'associated_sessions',
+    __slots__ = ['uid', 'name',  'path', 'transport',
                  'timeout', '_loop', '_timeout_handler', 'manager']
 
     def __init__(self, ws, path, timeout=1800):
