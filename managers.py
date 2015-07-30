@@ -64,7 +64,7 @@ class NormalUserConnectionManager(Manager):
     def get_connection(self, user_id):
         # Get session associated by client if exists.
 
-        return self.connection.get(user_id)
+        return self.connections.get(user_id)
 
 class CustomServiceConnectionManager(Manager):
     """
@@ -88,7 +88,7 @@ class CustomServiceConnectionManager(Manager):
     def get_connection(self, user_id):
         # Get session associated by client if exists.
 
-        return self.connection.get(user_id)
+        return self.connections.get(user_id)
 
     def get_connections(self):
         # Get all connections

@@ -98,6 +98,8 @@ class Register(MessageHandler):
         except KeyError:
             raise
 
+        self._redis.set(hex(connection.uid), connection.path)
+
     @asyncio.coroutine
     def register_succeed(self, connection):
         # Send successful reply
@@ -118,6 +120,10 @@ class Register(MessageHandler):
                 message.append(user[0], user[1])
 
         yield from connection.send(message)
+
+    # @asyncio.coroutine
+    # def store_user_role(self, user_id, role):
+    #     self._redis.set(user_id, role)
 
     @asyncio.coroutine
     def get_offline_msgs(self, connection):
@@ -165,8 +171,15 @@ class SendTextMsg(MessageHandler):
         :param msg: message to send
         :return: None
         """
-        current_connection = connection
-        _session = current_connection.associated_sessions.get(int(msg.recv), None)
+        # current_connection = connection
+        # _session = current_connection.associated_sessions.get(int(msg.recv), None)
+        connection_path = self._redis.get(hex(int(msg.recv)))
+        if connection_path == b'/service':
+            _connection_manager = NormalUserConnectionManager()
+        if connection_path == b'/':
+            _connection_manager = CustomServiceConnectionManager()
+
+        _session = _connection_manager.get_connection(int(msg.recv))
         if _session is not None:
             if _session.is_websocket:
                 # Send raw message directly
