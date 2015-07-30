@@ -75,32 +75,49 @@ class Register(MessageHandler):
             _connection_manager = NormalUserConnectionManager()
 
         try:
-            # Register user in global connection
-            _connection_manager.add_connection(connection)
-            # Start connection timer
-            connection.add_timeout()
-
-            # Send successful reply
-            yield from connection.send(RegisterSucceed())
+            yield from self.register(_connection_manager, connection)
+            yield from self.register_succeed(connection)
         except KeyError as exc:
-            yield from connection.send(RegisterFailed(reason=str(exc)))
+            yield from self.register_failed(connection, exc)
 
-        # Get associated users of current user from redis
-
-        message = UserMessage()
-
-        users = self._redis.get(connection.uid)
-        if users is not None:
-            for user in eval(users):
-                message.append(user[0], user[1])
-
-        yield from connection.send(message)
+        yield from self.send_associated_users(connection)
 
         # # Get offline msgs from db
         # offline_msgs = yield from self.get_offline_msgs(session)
         #
         # # Send offline msgs
         # yield from self.send_offline_msgs(offline_msgs, session)
+
+    @asyncio.coroutine
+    def register(self, connection_manager, connection):
+        # Register user in connection manager
+        try:
+            connection_manager.add_connection(connection)
+            # Start connection timer
+            connection.add_timeout()
+        except KeyError:
+            raise
+
+    @asyncio.coroutine
+    def register_succeed(self, connection):
+        # Send successful reply
+        yield from connection.send(RegisterSucceed())
+
+    @asyncio.coroutine
+    def register_failed(self, connection, exc):
+        # Send successful failed
+        yield from connection.send(RegisterFailed(reason=str(exc)))
+
+    @asyncio.coroutine
+    def send_associated_users(self, connection):
+        # Get associated users of current user from redis
+        message = UserMessage()
+        users = self._redis.get(connection.uid)
+        if users is not None:
+            for user in eval(users):
+                message.append(user[0], user[1])
+
+        yield from connection.send(message)
 
     @asyncio.coroutine
     def get_offline_msgs(self, connection):

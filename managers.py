@@ -3,6 +3,20 @@ __author__ = 'nmg'
 # from meta import MetaSession
 from meta import MetaConnection
 
+class ConnectionManager(metaclass=MetaConnection):
+    """
+    Connection manager for managing all other managers
+    """
+    @staticmethod
+    def add_connection(connection):
+        """
+        Add connection in connection manager according connection.path attribute
+        """
+        if connection.path == '/service':
+            CustomServiceConnectionManager().add_connection(connection)
+        if connection.path == '/':
+            NormalUserConnectionManager().add_connection(connection)
+
 class Manager(metaclass=MetaConnection):
     """
     Interface class for connection managers
@@ -28,7 +42,7 @@ class Manager(metaclass=MetaConnection):
         """
         raise NotImplementedError()
 
-class NormalUserConnectionManager(metaclass=MetaConnection):
+class NormalUserConnectionManager(Manager):
     """
     Normal user session manager. normal users means external user.
     """
@@ -52,7 +66,7 @@ class NormalUserConnectionManager(metaclass=MetaConnection):
 
         return self.connection.get(user_id)
 
-class CustomServiceConnectionManager(metaclass=MetaConnection):
+class CustomServiceConnectionManager(Manager):
     """
     Custom service session manager
     """

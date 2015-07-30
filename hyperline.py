@@ -65,7 +65,7 @@ class WSHyperLine(WSProtocol):
         # connection.session.transport = connection.ws
         # connection.session.path = connection.path
 
-        yield from connection.transport.send('welcome')
+        # yield from connection.transport.send('welcome')
 
     @asyncio.coroutine
     def message_received(self, message, connection):
