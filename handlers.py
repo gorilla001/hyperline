@@ -82,11 +82,11 @@ class Register(MessageHandler):
 
         yield from self.send_associated_users(connection)
 
-        # # Get offline msgs from db
-        # offline_msgs = yield from self.get_offline_msgs(session)
-        #
-        # # Send offline msgs
-        # yield from self.send_offline_msgs(offline_msgs, session)
+        # Get offline msgs from db
+        offline_msgs = yield from self.get_offline_msgs(connection)
+
+        # Send offline msgs
+        yield from self.send_offline_msgs(offline_msgs, connection)
 
     @asyncio.coroutine
     def register(self, connection_manager, connection):
@@ -128,7 +128,7 @@ class Register(MessageHandler):
     @asyncio.coroutine
     def get_offline_msgs(self, connection):
         # Get offline msg from mongodb.
-        return self._mongodb.get_msgs(receiver=connection.uid)
+        return self._mongodb.get_msgs(recv=connection.uid)
 
     @asyncio.coroutine
     def send_offline_msgs(self, offline_msgs, connection):
@@ -187,6 +187,10 @@ class SendTextMsg(MessageHandler):
             else:
                 # Pack message as length-prifixed and send to receiver.
                 _session.write(msg)
+
+            return asyncio.async(self.save_message(msg))
+
+        return asyncio.async(self.save_message(msg, online=False))
 
         # try:
         #     _session = self._session_manager.get_session(msg.recv)

@@ -58,7 +58,7 @@ class MongoProxy(object):
 
         return coll.insert(msg)
 
-    def get_msgs(self, invent='messages', receiver=None, status=0):
+    def get_msgs(self, invent='messages', recv=None, status=0):
         """
         Get messages from collection.
 
@@ -73,7 +73,7 @@ class MongoProxy(object):
         if not receiver:
             return coll.find({'status': 0})
 
-        return coll.find({"$and": [{'receiver': receiver}, {'status': status}]})
+        return coll.find({"$and": [{'recv': recv}, {'status': status}]})
 
 class RedisProxy(object):
     def __init__(self):
