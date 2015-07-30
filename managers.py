@@ -7,8 +7,8 @@ class Manager(metaclass=MetaConnection):
     """
     Interface class for connection managers
     """
-    def __init__(self):
-        self.connections = {}
+    # def __init__(self):
+    #     self.connections = {}
 
     def add_connection(self, connection):
         """
@@ -28,10 +28,13 @@ class Manager(metaclass=MetaConnection):
         """
         raise NotImplementedError()
 
-class NormalUserConnectionManager(Manager):
+class NormalUserConnectionManager(metaclass=MetaConnection):
     """
     Normal user session manager. normal users means external user.
     """
+    def __init__(self):
+        self.connections = {}
+
     def add_connection(self, connection):
         """
         Add session in SessionManager
@@ -49,10 +52,13 @@ class NormalUserConnectionManager(Manager):
 
         return self.connection.get(user_id)
 
-class CustomServiceConnectionManager(Manager):
+class CustomServiceConnectionManager(metaclass=MetaConnection):
     """
     Custom service session manager
     """
+    def __init__(self):
+        self.connections = {}
+
     def add_connection(self, connection):
         """
         Add session in SessionManager

@@ -30,6 +30,7 @@ class MessageType(Enum):
     REGISTER_RESPONSE = '11'
     REQUEST_SERVICE = '12'
     REQUEST_SERVICE_RESPONSE = '13'
+    ASSOCIATED_USERS = '14'
 
     UNKNOWN = '404'
 
@@ -269,6 +270,25 @@ class RegisterFailed(object):
     @property
     def json(self):
         return {'type': self.__msgtype__.value, 'body': {'status': 500, 'reason': self.reason}}
+
+# Internal message
+class UserMessage(object):
+    """
+
+    """
+    __msgtype__ = MessageType.ASSOCIATED_USERS
+
+    def __init__(self):
+        self.users = []
+
+    def append(self, uid, name):
+        user = {'uid': uid, 'name': name}
+        if user not in self.users:
+            self.users.append(user)
+
+    @property
+    def json(self):
+        return {'type': self.__msgtype__.value, 'body': self.users}
 
 if __name__ == '__main__':
     _msg = {'type': 'register', 'uid': '123456', 'role': '0'}

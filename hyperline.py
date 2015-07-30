@@ -8,9 +8,10 @@ import log as logging
 from protocol import HyperLineProtocol
 from protocol import WSProtocol
 from handlers import MessageHandler
-from session import SessionManager
+# from session import SessionManager
 from messages import Message
 from messages import MessageFormatError
+from validators import validate_format
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +79,7 @@ class WSHyperLine(WSProtocol):
             return
 
         # Message format validate
-        if {'type', 'body'} != set(message):
+        if not validate_format()(message):
             raise MessageFormatError('type or body fields must be specified')
             return
 

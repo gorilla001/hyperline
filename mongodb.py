@@ -8,6 +8,7 @@ from pymongo.errors import ConnectionFailure
 import log as logging
 import asyncio
 import sys
+import redis
 
 _MONGO_HOST = '192.168.99.100'
 _MONGO_PORT = 32768
@@ -73,3 +74,24 @@ class MongoProxy(object):
             return coll.find({'status': 0})
 
         return coll.find({"$and": [{'receiver': receiver}, {'status': status}]})
+
+class RedisProxy(object):
+    def __init__(self):
+        self.host = '192.168.99.100'
+        self.port = 32772
+        self.connection = None
+        self.connect()
+
+    def connect(self):
+        self.connection = redis.StrictRedis(host=self.host, port=self.port, db=0)
+
+    def set(self, key, value):
+        self.connection.set(key, value)
+
+    def get(self, key):
+        return self.connection.get(key)
+
+if __name__ == '__main__':
+    _redis = RedisProxy()
+    print(_redis.get(200))
+

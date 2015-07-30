@@ -1,6 +1,5 @@
 __author__ = 'nmg'
 
-from decorator import singleton
 from meta import MetaHandler
 
 __all__ = ['MessageHandler']
@@ -11,8 +10,8 @@ import logging
 
 # from session import SessionManager
 from managers import NormalUserConnectionManager, CustomServiceConnectionManager
-from mongodb import MongoProxy
-from messages import MessageType, RegisterSucceed, RegisterFailed, ReadyMessage, RequestForServiceResponse
+from mongodb import MongoProxy, RedisProxy
+from messages import MessageType, RegisterSucceed, RegisterFailed, ReadyMessage, RequestForServiceResponse, UserMessage
 
 
 logger = logging.getLogger(__name__)
@@ -29,6 +28,7 @@ class MessageHandler(metaclass=MetaHandler):
     """
     # _session_manager = SessionManager()
     _mongodb = MongoProxy()
+    _redis = RedisProxy()
 
     def handle(self, msg, connection):
         try:
@@ -84,6 +84,17 @@ class Register(MessageHandler):
             yield from connection.send(RegisterSucceed())
         except KeyError as exc:
             yield from connection.send(RegisterFailed(reason=str(exc)))
+
+        # Get associated users of current user from redis
+
+        message = UserMessage()
+
+        users = self._redis.get(connection.uid)
+        if users is not None:
+            for user in eval(users):
+                message.append(user[0], user[1])
+
+        yield from connection.send(message)
 
         # # Get offline msgs from db
         # offline_msgs = yield from self.get_offline_msgs(session)
@@ -244,6 +255,18 @@ class RequestForService(MessageHandler):
             # Session bind
             custom_service.associated_sessions[current_connection.uid] = current_connection
             current_connection.associated_sessions[custom_service.uid] = custom_service
+
+            # Store relationship in redis
+            users = self._redis.get(current_connection.uid)
+            users = eval(users) if users is not None else []
+            users.append((custom_service.uid, custom_service.name))
+            self._redis.set(current_connection.uid, users)
+
+            users = self._redis.get(custom_service.uid)
+            users = eval(users) if users is not None else []
+            users.append((current_connection.uid, current_connection.name))
+            self._redis.set(custom_service.uid, users)
+
         except IndexError:
             response_message = RequestForServiceResponse()
             response_message.status = 404
