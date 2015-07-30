@@ -98,7 +98,7 @@ class Register(MessageHandler):
         except KeyError:
             raise
 
-        self._redis.set(hex(connection.uid), connection.path)
+        self._redis.set(hex(int(connection.uid)), connection.path)
 
     @asyncio.coroutine
     def register_succeed(self, connection):
@@ -175,11 +175,13 @@ class SendTextMsg(MessageHandler):
         # _session = current_connection.associated_sessions.get(int(msg.recv), None)
         connection_path = self._redis.get(hex(int(msg.recv)))
         if connection_path == b'/service':
-            _connection_manager = NormalUserConnectionManager()
-        if connection_path == b'/':
             _connection_manager = CustomServiceConnectionManager()
+        if connection_path == b'/':
+            _connection_manager = NormalUserConnectionManager()
 
         _session = _connection_manager.get_connection(int(msg.recv))
+        print(_connection_manager)
+        print(_session)
         if _session is not None:
             if _session.is_websocket:
                 # Send raw message directly
@@ -282,9 +284,9 @@ class RequestForService(MessageHandler):
 
             yield from current_connection.send(response_message)
 
-            # Session bind
-            custom_service.associated_sessions[current_connection.uid] = current_connection
-            current_connection.associated_sessions[custom_service.uid] = custom_service
+            # # Session bind
+            # custom_service.associated_sessions[current_connection.uid] = current_connection
+            # current_connection.associated_sessions[custom_service.uid] = custom_service
 
             # Store relationship in redis
             users = self._redis.get(current_connection.uid)

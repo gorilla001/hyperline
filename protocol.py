@@ -95,7 +95,7 @@ class Connection(object):
         self.path = path
         self.transport = ws  # client connection
 
-        self.associated_sessions = {}
+        # self.associated_sessions = {}
 
         self.timeout = timeout
         self._loop = asyncio.get_event_loop()
