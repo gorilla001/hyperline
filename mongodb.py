@@ -6,12 +6,13 @@ __all__ = ['MongoProxy']
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 import log as logging
-import asyncio
 import sys
 import redis
+import asyncio
+
 
 _MONGO_HOST = '192.168.99.100'
-_MONGO_PORT = 32768
+_MONGO_PORT = 32773
 _MONGO_DB = 'hyperline'
 
 logger = logging.getLogger(__name__)
@@ -25,23 +26,27 @@ class MongoProxy(object):
         self.max_retries = 5
         self.retry_interval = 5
 
-        self.connect()
+        asyncio.async(self.connect())
 
+    @asyncio.coroutine
     def connect(self):
         attempt = 0
         while True:
             attempt += 1
             try:
-                self._connect()
+                yield from self._connect()
+                logger.info("Connecting to MongoDB server on {}:{} succeed".format(self.host, self.port))
                 return
             except ConnectionFailure:
-                logger.info("Connecting to MongoDB failed...retry")
+                logger.error("Connecting to MongoDB failed...retry after {} seconds".format(self.retry_interval))
 
             if attempt >= self.max_retries:
-                logger.error("Connecting to MongoDB server on %(host)s:%(port)d falied" % (self.host, self.port))
+                logger.error("Connecting to MongoDB server on {}:{} falied".format(self.host, self.port))
                 sys.exit(1)
             yield from asyncio.sleep(self.retry_interval)
+            # time.sleep(self.retry_interval)
 
+    @asyncio.coroutine
     def _connect(self):
         self.connection = MongoClient(self.host, self.port)
 
@@ -70,7 +75,7 @@ class MongoProxy(object):
         """
 
         coll = self.connection[self.db][invent]
-        if not receiver:
+        if not recv:
             return coll.find({'status': 0})
 
         return coll.find({"$and": [{'recv': recv}, {'status': status}]})
@@ -92,6 +97,5 @@ class RedisProxy(object):
         return self.connection.get(key)
 
 if __name__ == '__main__':
-    _redis = RedisProxy()
-    print(_redis.get(200))
+    MongoProxy()
 
