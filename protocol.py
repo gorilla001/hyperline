@@ -185,7 +185,7 @@ class WSProtocol(object):
     the connection is lost.
 
     Method `__call__` must accept two arguments, one is a `websockets.server.WebSocketServerProtocol` and
-    the other is request URI.(ignored in this place)
+    the other is request URI.
     """
     @asyncio.coroutine
     def __call__(self, ws, path):
@@ -238,6 +238,8 @@ class WSProtocol(object):
         logger.info('connection lost')
 
         yield from connection.close()
+
+        connection.explode()
         #
         # if connection.path == '/service':
         #     CustomServiceConnectionManager().pop_connection(connection.uid)

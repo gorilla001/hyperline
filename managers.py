@@ -93,7 +93,10 @@ class CustomServiceConnectionManager(Manager):
         """
         Delete session from SessionManager
         """
-        self._connections.pop(user_id)
+        try:
+            self._connections.pop(user_id)
+        except KeyError:
+            pass
 
     def get_connection(self, user_id):
         # Get session associated by client if exists.
