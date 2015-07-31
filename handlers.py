@@ -311,13 +311,45 @@ class RequestForService(MessageHandler):
 
 class GetHistoryMessage(object):
     """
-    Get histroy message of current user
+    Get history message of current user
     """
     __msgtype__ = MessageType.HISTORY_MESSAGE
 
     def handler(self, msg, connection):
-        pass
+        uid = connection.uid
+        offset = msg.offset
+        count = msg.count
+        transport = connection.transport
 
+        history_messages = yield from self.get_history_msgs(uid, offset, count)
+
+        yield from self.send_history_msgs(history_messages, transport)
+
+    @asyncio.coroutine
+    def get_history_msgs(self, uid, offset, count):
+        # Get offline msg from mongodb.
+        return self._mongodb.get_msgs_by_count(recv=uid, offset=offset, count=count)
+
+    @asyncio.coroutine
+    def send_history_msgs(self, history_msgs, connection):
+        """
+        Send offline msgs to current user
+        """
+        for msg in history_msgs:
+            del msg['_id']
+            msg = json.dumps(msg)
+            try:
+                # Normal Socket use method `write` to send message, while Web Socket use method `send`
+                # For Web Socket, just send raw message
+                # FIXME: try to determine connection type by connection attribute
+                if hasattr(connection.transport, 'write'):
+                    # Pack message as length-prifixed and send to receiver.
+                    connection.write(msg)
+                else:
+                    # Send raw message directly
+                    connection.send(msg)
+            except Exception:
+                raise
 
 
 class ErrorHandler(MessageHandler):

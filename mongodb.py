@@ -68,7 +68,7 @@ class MongoProxy(object):
         Get messages from collection.
 
         @param invent: the collection
-        @param receiver: message receiver
+        @param recv: message receiver
         @param status: message status, 0-offline, 1-online
 
         @return: `pymongo.cursor.Cursor object`
@@ -79,6 +79,19 @@ class MongoProxy(object):
             return coll.find({'status': 0})
 
         return coll.find({"$and": [{'recv': recv}, {'status': status}]})
+
+    def get_msgs_by_count(self, recv, offset=0, count=0, invent='messages'):
+        """
+        Get messages by offset and messages count.
+        @param offset: control where MongoDB begins returning results
+        @param count: specify the maximum number of documents the cursor will return
+        @param invent: the collection
+        @param recv: message receiver
+        @return: history messages
+        """
+        coll = self.connection[self.db][invent]
+
+        return coll.find({'recv': recv}).skip(offset).limit(count)
 
 class RedisProxy(object):
     def __init__(self):

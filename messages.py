@@ -54,7 +54,7 @@ class Message(metaclass=MetaMessage):
     def __call__(self, msg):
 
         try:
-            return self._msg_factories[msg['type']].factory(msg['body'])
+            return self._msg_factories[msg['type']].factory(msg)
         except TypeError:
             logger.error("Malformed msg {}.".format(msg))
         except KeyError:
@@ -90,6 +90,7 @@ class RegisterMessage(Message):
 
     @classmethod
     def factory(cls, msg):
+        msg = msg['body']
         try:
             uid = msg['uid']
             name = msg['name']
@@ -108,25 +109,26 @@ class RequestForService(Message):
 
     Message should like this:
 
-    {'type': '12', 'body': {'content': '10'}}
+    # {'type': '12', 'body': {'content': '10'}}
+    {'type': '12'}
     """
     __msgtype__ = MessageType.REQUEST_SERVICE
 
-    def __init__(self, content):
-        self.content = content
-
-    @classmethod
-    def factory(cls, msg):
-        try:
-            content = msg['content']
-        except KeyError:
-            raise MessageFormatError("Malformed msg {}".format(msg))
-
-        return cls(content)
-
-    @property
-    def json(self):
-        return {'type': self.__msgtype__.value, 'body': {'content': self.content}}
+    # def __init__(self, content):
+    #     self.content = content
+    #
+    # @classmethod
+    # def factory(cls, msg):
+    #     try:
+    #         content = msg['content']
+    #     except KeyError:
+    #         raise MessageFormatError("Malformed msg {}".format(msg))
+    #
+    #     return cls(content)
+    #
+    # @property
+    # def json(self):
+    #     return {'type': self.__msgtype__.value, 'body': {'content': self.content}}
 
 class RequestForServiceResponse(object):
     """
@@ -162,6 +164,7 @@ class TextMessage(Message):
 
     @classmethod
     def factory(cls, msg):
+        msg = msg['body']
         try:
             uid = msg['uid']
             recv = msg['recv']
@@ -188,6 +191,7 @@ class UnregisterMessage(Message):
 
     @classmethod
     def factory(cls, msg):
+        msg = msg['body']
         try:
             uid = msg['uid']
         except KeyError:
@@ -224,7 +228,7 @@ class ReplyMessage(Message):
     def json(self):
         return {'type': self.__msgtype__, 'body': {'status': self.status, 'cs_id': self.cs_id}}
 
-
+# Internal message
 class ReadyMessage(object):
     """
     Used for telling custom service and normal user start conversation.
@@ -291,6 +295,29 @@ class UserMessage(object):
     @property
     def json(self):
         return {'type': self.__msgtype__.value, 'body': self.users}
+
+class GetHistoryMessage(object):
+    """
+    Get user history message
+
+    {'type': '15', 'body': {'offset': 0, 'count': 10}}
+    """
+    __msgtype__ = MessageType.HISTORY_MESSAGE
+
+    def __init__(self, offset, count):
+        self.offset = offset
+        self.count = count
+
+    @classmethod
+    def factory(cls, msg):
+        msg = msg['body']
+        try:
+            offset = msg['offset']
+            count = msg['count']
+        except KeyError:
+            raise MessageFormatError("Malformed msg {}".format(msg))
+
+        return cls(offset, count)
 
 
 if __name__ == '__main__':

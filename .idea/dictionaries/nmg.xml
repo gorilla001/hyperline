@@ -4,6 +4,7 @@
       <w>amqp</w>
       <w>asctime</w>
       <w>asyncio</w>
+      <w>classmethod</w>
       <w>coroutine</w>
       <w>datefmt</w>
       <w>dropdown</w>
