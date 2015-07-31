@@ -80,7 +80,7 @@ class WSHyperLine(WSProtocol):
 
         # Message format validate
         if not validate_format()(message):
-            raise MessageFormatError('type or body fields must be specified')
+            raise MessageFormatError('type fields must be specified')
             return
 
         logger.info("Send message {}".format(message))
