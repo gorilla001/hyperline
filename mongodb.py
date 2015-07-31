@@ -95,9 +95,30 @@ class RedisProxy(object):
         self.host = cfg.REDIS_HOST
         self.port = cfg.REDIS_PORT
         self.connection = None
-        self.connect()
+        self.max_retries = 5
+        self.retry_interval = 5
 
+        asyncio.async(self.connect())
+
+    @asyncio.coroutine
     def connect(self):
+        attempt = 0
+        while True:
+            attempt += 1
+            try:
+                yield from self._connect()
+                logger.info("Connecting to Redis server on {}:{} succeed".format(self.host, self.port))
+                return
+            except ConnectionFailure:
+                logger.error("Connecting to Redis failed...retry after {} seconds".format(self.retry_interval))
+
+            if attempt >= self.max_retries:
+                logger.error("Connecting to Redis server on {}:{} falied".format(self.host, self.port))
+                sys.exit(1)
+            yield from asyncio.sleep(self.retry_interval)
+
+    @asyncio.coroutine
+    def _connect(self):
         self.connection = redis.StrictRedis(host=self.host, port=self.port, db=0)
 
     def set(self, key, value):
