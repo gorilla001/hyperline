@@ -166,6 +166,13 @@ class Connection(object):
     def is_websocket(self):
         return hasattr(self.transport, 'send')
 
+    @property
+    def open(self):
+        """
+        If connection is not closed, return True; otherwise return Fasle
+        """
+        return self.transport.state == 1
+
 
 # class Connection(object):
 #     def __init__(self, ws, session):

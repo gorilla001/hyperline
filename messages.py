@@ -116,19 +116,21 @@ class RequestForService(Message):
 
     # def __init__(self, content):
     #     self.content = content
-    #
-    # @classmethod
-    # def factory(cls, msg):
-    #     try:
-    #         content = msg['content']
-    #     except KeyError:
-    #         raise MessageFormatError("Malformed msg {}".format(msg))
-    #
-    #     return cls(content)
-    #
-    # @property
-    # def json(self):
-    #     return {'type': self.__msgtype__.value, 'body': {'content': self.content}}
+
+    @classmethod
+    def factory(cls, _):
+        # try:
+        #     content = msg['content']
+        # except KeyError:
+        #     raise MessageFormatError("Malformed msg {}".format(msg))
+
+        # return cls(content)
+        return cls()
+
+    @property
+    def json(self):
+        # return {'type': self.__msgtype__.value, 'body': {'content': self.content}}
+        return {'type': self.__msgtype__.value}
 
 class RequestForServiceResponse(object):
     """

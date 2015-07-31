@@ -61,7 +61,10 @@ class NormalUserConnectionManager(object):
         """
         Delete session from SessionManager
         """
-        self.connections.pop(user_id)
+        try:
+            self.connections.pop(user_id)
+        except KeyError:
+            pass
 
     def get_connection(self, user_id):
         # Get session associated by client if exists.
