@@ -12,7 +12,8 @@ __all__ = ['MessageType',
            'RegisterFailed',
            'RequestForService',
            'RequestForServiceResponse',
-           'ReadyMessage']
+           'ReadyMessage',
+           'HistoryMessage']
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,7 @@ class MessageType(Enum):
     REQUEST_SERVICE = '12'
     REQUEST_SERVICE_RESPONSE = '13'
     ASSOCIATED_USERS = '14'
+    HISTORY_MESSAGE = '15'
 
     UNKNOWN = '404'
 
@@ -289,6 +291,7 @@ class UserMessage(object):
     @property
     def json(self):
         return {'type': self.__msgtype__.value, 'body': self.users}
+
 
 if __name__ == '__main__':
     _msg = {'type': 'register', 'uid': '123456', 'role': '0'}
