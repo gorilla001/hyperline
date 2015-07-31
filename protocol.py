@@ -167,7 +167,7 @@ class Connection(object):
         return hasattr(self.transport, 'send')
 
     @property
-    def open(self):
+    def is_open(self):
         """
         If connection is not closed, return True; otherwise return Fasle
         """
