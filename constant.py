@@ -1,11 +1,11 @@
 __author__ = 'nmg'
 
 # Mongodb
-MONGO_HOST = '192.168.99.100'
-MONGO_PORT = 32773
-MONGO_DB = 'hyperline'
+mongo_host = '192.168.99.100'
+mongo_port = 32773
+mongo_db = 'hyperline'
 
 
 # Redis
-REDIS_HOST = '192.168.99.100'
-REDIS_PORT = 32772
+redis_host = '192.168.99.100'
+redis_port = 32772

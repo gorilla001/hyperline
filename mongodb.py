@@ -15,10 +15,10 @@ import constant as cfg
 logger = logging.getLogger(__name__)
 
 class MongoProxy(object):
-    def __init__(self):
-        self.host = cfg.MONGO_HOST
-        self.port = cfg.MONGO_PORT
-        self.db = cfg.MONGO_DB
+    def __init__(self, host, port, db):
+        self.host = host
+        self.port = port
+        self.db = db
         self.connection = None
         self.max_retries = 5
         self.retry_interval = 5
@@ -91,9 +91,9 @@ class MongoProxy(object):
         return coll.find({'recv': recv}).skip(offset).limit(count)
 
 class RedisProxy(object):
-    def __init__(self):
-        self.host = cfg.REDIS_HOST
-        self.port = cfg.REDIS_PORT
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
         self.connection = None
         self.max_retries = 5
         self.retry_interval = 5

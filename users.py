@@ -29,6 +29,22 @@ class User(object):
     def deserialize(self):
         return pickle.loads(self)
 
+    @property
+    def uid(self):
+        return self._uid
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def role(self):
+        return self._role
+
+    @property
+    def head_img(self):
+        return self._head_img
+
 
 class CustomService(object):
     """

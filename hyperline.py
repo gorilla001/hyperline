@@ -78,10 +78,10 @@ class WSHyperLine(WSProtocol):
             raise MessageFormatError('message is not json object')
             return
 
-        # Message format validate
-        if not validate_format()(message):
-            raise MessageFormatError('type or body fields must be specified')
-            return
+        # # Message format validate
+        # if not validate_format()(message):
+        #     raise MessageFormatError('type or body fields must be specified')
+        #     return
 
         logger.info("Send message {}".format(message))
         return self.handler.handle(self.message(message), connection)

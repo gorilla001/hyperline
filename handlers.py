@@ -12,6 +12,7 @@ import logging
 from managers import NormalUserConnectionManager, CustomServiceConnectionManager
 from mongodb import MongoProxy, RedisProxy
 from messages import MessageType, RegisterSucceed, RegisterFailed, ReadyMessage, RequestForServiceResponse, UserMessage
+import constant as cfg
 
 
 logger = logging.getLogger(__name__)
@@ -19,16 +20,18 @@ logger = logging.getLogger(__name__)
 class MessageHandler(metaclass=MetaHandler):
 
     """
-    Variables `_session` and `_mongodb` are all class variable. This ensure
+    Variables `_redis` and `_mongodb` are all class variable. This ensure
     that only one copy between instances that were instantiated from `MessageHandler`
     for many times. These variables are shared between these instances.
 
     The points is that the class variables are shared between instances. so don't worried
-    for different session and mongodb.
+    for different redis and mongodb.
     """
-    # _session_manager = SessionManager()
-    _mongodb = MongoProxy()
-    _redis = RedisProxy()
+    _mongodb = MongoProxy(cfg.mongo_host,
+                          cfg.mongo_port,
+                          cfg.mongo_db)
+
+    _redis = RedisProxy(cfg.redis_host, cfg.redis_port)
 
     def handle(self, msg, connection):
         try:
