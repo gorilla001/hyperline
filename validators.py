@@ -17,7 +17,7 @@ def validate_format():
     Validator message format
     """
     def _do(msg):
-        if {'type', 'body'} != set(msg):
+        if 'type' not in set(msg):
             return False
         return True
 
