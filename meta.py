@@ -50,3 +50,9 @@ class MetaConnection(type):
         if cls not in cls._instances:
             cls._instances[cls] = super(MetaConnection, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
+
+    # def __new__(mcs, *args, **kwargs):
+    #     try:
+    #         mcs.connections = mcs.connections.copy()
+    #     except AttributeError:
+    #         mcs.connections = {}

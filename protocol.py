@@ -88,7 +88,7 @@ class Connection(object):
     __slots__ = ['uid', 'name',  'path', 'transport',
                  'timeout', '_loop', '_timeout_handler', 'manager']
 
-    def __init__(self, ws, path, timeout=1800):
+    def __init__(self, ws, path, timeout=10):
         self.uid = None  # client id
         self.name = None  # client name
 
@@ -109,7 +109,7 @@ class Connection(object):
 
     def timeout_handler(self):
         # Close connection
-        asyncio.async(self.transport.close())
+        asyncio.async(self.transport.close(reason="Connect Timeout"))
 
         # Delete self from SessionManager
         self.explode()
@@ -238,8 +238,8 @@ class WSProtocol(object):
         logger.info('connection lost')
 
         yield from connection.close()
-
-        if connection.path == '/service':
-            CustomServiceConnectionManager().pop_connection(connection.uid)
-        else:
-            NormalUserConnectionManager().pop_connection(connection.uid)
+        #
+        # if connection.path == '/service':
+        #     CustomServiceConnectionManager().pop_connection(connection.uid)
+        # else:
+        #     NormalUserConnectionManager().pop_connection(connection.uid)
