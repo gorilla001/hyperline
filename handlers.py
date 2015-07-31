@@ -331,7 +331,7 @@ class GetHistoryMessage(object):
         return self._mongodb.get_msgs_by_count(recv=uid, offset=offset, count=count)
 
     @asyncio.coroutine
-    def send_history_msgs(self, history_msgs, connection):
+    def send_history_msgs(self, history_msgs, transport):
         """
         Send offline msgs to current user
         """
@@ -342,12 +342,12 @@ class GetHistoryMessage(object):
                 # Normal Socket use method `write` to send message, while Web Socket use method `send`
                 # For Web Socket, just send raw message
                 # FIXME: try to determine connection type by connection attribute
-                if hasattr(connection.transport, 'write'):
+                if hasattr(transport, 'write'):
                     # Pack message as length-prifixed and send to receiver.
-                    connection.write(msg)
+                    transport.write(msg)
                 else:
                     # Send raw message directly
-                    connection.send(msg)
+                    transport.send(msg)
             except Exception:
                 raise
 
