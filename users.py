@@ -2,6 +2,7 @@ __author__ = 'nmg'
 
 from enum import Enum
 import json
+import pickle
 
 class UserType(Enum):
     """
@@ -16,10 +17,17 @@ class User(object):
     """
     Every connection user map to one User object
     """
-    def __init__(self, uid=None, name=None, role=None):
+    def __init__(self, uid=None, name=None, role=None, head_img=None):
         self._uid = uid
         self._name = name
         self._role = role
+        self._head_img = head_img
+
+    def serialize(self):
+        return pickle.dumps(self)
+
+    def deserialize(self):
+        return pickle.loads(self)
 
 
 class CustomService(object):

@@ -9,19 +9,16 @@ import log as logging
 import sys
 import redis
 import asyncio
+import constant as cfg
 
-
-_MONGO_HOST = '192.168.99.100'
-_MONGO_PORT = 32773
-_MONGO_DB = 'hyperline'
 
 logger = logging.getLogger(__name__)
 
 class MongoProxy(object):
     def __init__(self):
-        self.host = _MONGO_HOST
-        self.port = _MONGO_PORT
-        self.db = _MONGO_DB
+        self.host = cfg.MONGO_HOST
+        self.port = cfg.MONGO_PORT
+        self.db = cfg.MONGO_DB
         self.connection = None
         self.max_retries = 5
         self.retry_interval = 5
@@ -95,8 +92,8 @@ class MongoProxy(object):
 
 class RedisProxy(object):
     def __init__(self):
-        self.host = '192.168.99.100'
-        self.port = 32772
+        self.host = cfg.REDIS_HOST
+        self.port = cfg.REDIS_PORT
         self.connection = None
         self.connect()
 

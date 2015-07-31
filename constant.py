@@ -1,22 +1,11 @@
 __author__ = 'nmg'
 
-class ConstError(TypeError):
-    pass
-
-class ConstCaseError(ConstError):
-    pass
-
-class Const(object):
-
-    def __setattr__(self, key, value):
-        if key in self.__dict__:
-            raise ConstError()
-
-        self.__dict__[key] = value
+# Mongodb
+MONGO_HOST = '192.168.99.100'
+MONGO_PORT = 32773
+MONGO_DB = 'hyperline'
 
 
-import sys
-sys.modules[__name__] = Const()
-import constant
-print(sys.modules[__name__])
-
+# Redis
+REDIS_HOST = '192.168.99.100'
+REDIS_PORT = 32772
