@@ -84,7 +84,7 @@ class CustomServiceConnectionManager(Manager):
     def __init__(self):
         self._connections = {}
         self._loop = asyncio.get_event_loop()
-        self.looping_call()
+        # self.looping_call()
 
     def add_connection(self, connection):
         """

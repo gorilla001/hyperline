@@ -324,6 +324,23 @@ class GetHistoryMessage(Message):
 
         return cls(recv, offset, count)
 
+# Internal message
+class HistoryMessage(object):
+    """
+    History message send to uers
+    """
+    __msgtype__ = MessageType.HISTORY_MESSAGE
+
+    def __init__(self):
+        self.messages = []
+
+    def append(self, msg):
+        if msg not in self.messages:
+            self.messages.append(msg)
+
+    @property
+    def json(self):
+        return {'type': self.__msgtype__.value, 'body': self.messages}
 
 if __name__ == '__main__':
     _msg = {'type': 'register', 'uid': '123456', 'role': '0'}

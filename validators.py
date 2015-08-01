@@ -22,3 +22,15 @@ def validate_format():
         return True
 
     return _do
+
+def validate_int():
+    """
+    Validate int value
+    """
+    def _do(val):
+        if not isinstance(val, int):
+            return False
+
+        return True
+
+    return _do

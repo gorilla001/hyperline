@@ -9,7 +9,6 @@ import log as logging
 import sys
 import redis
 import asyncio
-import constant as cfg
 
 
 logger = logging.getLogger(__name__)
@@ -87,8 +86,7 @@ class MongoProxy(object):
         @return: history messages
         """
         coll = self.connection[self.db][invent]
-
-        return coll.find({'recv': recv}).skip(offset).limit(count)
+        return coll.find({'body.recv': recv}).skip(offset).limit(count)
 
 class RedisProxy(object):
     def __init__(self, host, port):
@@ -128,5 +126,11 @@ class RedisProxy(object):
         return self.connection.get(key)
 
 if __name__ == '__main__':
-    MongoProxy()
+    import constant as cfg
+    _proxy= MongoClient(cfg.mongo_host, cfg.mongo_port)
+    _coll = _proxy['hyperline']['messages']
+    result = _coll.find({'body.recv': 100})
+    for res in result:
+        print(res)
+    print(result)
 

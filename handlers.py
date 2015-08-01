@@ -12,6 +12,7 @@ import logging
 from managers import NormalUserConnectionManager, CustomServiceConnectionManager
 from mongodb import MongoProxy, RedisProxy
 from messages import MessageType, RegisterSucceed, RegisterFailed, ReadyMessage, RequestForServiceResponse, UserMessage
+from messages import HistoryMessage
 import constant as cfg
 
 
@@ -45,6 +46,9 @@ class MessageHandler(metaclass=MetaHandler):
         # Don’t directly create Task instances: use the async() function
         # or the BaseEventLoop.create_task() method.
 
+        # if hasattr(_handler, 'handle'):
+        #     return asyncio.async(_handler().handle(msg, connection))
+        # raise AttributeError()
         return asyncio.async(_handler().handle(msg, connection))
 
 class Register(MessageHandler):
@@ -318,39 +322,47 @@ class GetHistoryMessage(MessageHandler):
     """
     __msgtype__ = MessageType.HISTORY_MESSAGE
 
+    @asyncio.coroutine
     def handle(self, msg, connection):
         recv = msg.recv
         offset = msg.offset
         count = msg.count
-        transport = connection.transport
 
         history_messages = yield from self.get_history_msgs(recv, offset, count)
+        print('history messages:', history_messages)
 
-        yield from self.send_history_msgs(history_messages, transport)
+        yield from self.send_history_msgs(history_messages, connection)
 
     @asyncio.coroutine
     def get_history_msgs(self, recv, offset, count):
         # Get offline msg from mongodb.
+        logger.info('history message')
         return self._mongodb.get_msgs_by_count(recv=recv, offset=offset, count=count)
 
     @asyncio.coroutine
-    def send_history_msgs(self, history_msgs, transport):
+    def send_history_msgs(self, history_msgs, connection):
         """
         Send offline msgs to current user
         """
         for msg in history_msgs:
+            print(msg)
             del msg['_id']
-            msg = json.dumps(msg)
+            message = HistoryMessage()
+            message.append(msg['body'])
             try:
                 # Normal Socket use method `write` to send message, while Web Socket use method `send`
                 # For Web Socket, just send raw message
                 # FIXME: try to determine connection type by connection attribute
-                if hasattr(transport, 'write'):
-                    # Pack message as length-prifixed and send to receiver.
-                    transport.write(msg)
+                if connection.is_websocket:
+                    yield from connection.send(message)
                 else:
-                    # Send raw message directly
-                    transport.send(msg)
+                    connection.write(message)
+                # if hasattr(transport, 'write'):
+                #     # Pack message as length-prifixed and send to receiver.
+                #     transport.write(message)
+                # else:
+                #     # Send raw message directly
+                #     yield from transport.send(message)
             except Exception:
                 raise
 

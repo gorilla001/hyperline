@@ -31,8 +31,12 @@ import websockets
 class SlowSquareClientProtocol(WebSocketClientProtocol):
 
     def onOpen(self):
-        message = {'type': 'register', 'body': {'uid': 'client-1', 'role': '10'}}
+        message = {'type': '1', 'body': {'recv': 100, 'uid': 1, 'content': 'hello'}}
         self.sendMessage(json.dumps(message).encode('utf8'))
+
+        message = {'type': '15', 'body': {'recv': 100,'count': 10, 'offset': 0}}
+        self.sendMessage(json.dumps(message).encode('utf8'))
+
         # #self.sendMessage(bytes(message, encoding='utf8'))
         # self.sendMessage(bytes('hello', encoding='utf8'))
 
