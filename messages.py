@@ -303,11 +303,12 @@ class GetHistoryMessage(Message):
     """
     Get user history message
 
-    {'type': '15', 'body': {'offset': 0, 'count': 10}}
+    {'type': '15', 'body': {'recv': 100, 'offset': 0, 'count': 10}}
     """
     __msgtype__ = MessageType.HISTORY_MESSAGE
 
-    def __init__(self, offset, count):
+    def __init__(self, recv, offset, count):
+        self.recv = recv
         self.offset = offset
         self.count = count
 
@@ -315,12 +316,13 @@ class GetHistoryMessage(Message):
     def factory(cls, msg):
         msg = msg['body']
         try:
+            recv = msg['recv']
             offset = msg['offset']
             count = msg['count']
         except KeyError:
             raise MessageFormatError("Malformed msg {}".format(msg))
 
-        return cls(offset, count)
+        return cls(recv, offset, count)
 
 
 if __name__ == '__main__':
