@@ -319,7 +319,8 @@ class GetHistoryMessage(Message):
             offset = msg['offset']
             count = msg['count']
         except KeyError:
-            raise MessageFormatError("Malformed msg {}".format(msg))
+            traceback.print_exc()
+            raise MessageFormatError()
 
         return cls(recv, offset, count)
 
