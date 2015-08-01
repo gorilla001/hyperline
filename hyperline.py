@@ -70,7 +70,7 @@ class WSHyperLine(WSProtocol):
     @asyncio.coroutine
     def message_received(self, message, connection):
         """
-        Decoding Json object to python dictionary. If it failed, send back the message and close connection.
+        Decoding Json object to python dictionary. If it failed, raise error and return.
         """
         try:
             message = json.loads(message)  # message is json object
