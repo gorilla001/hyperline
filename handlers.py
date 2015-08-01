@@ -312,13 +312,13 @@ class RequestForService(MessageHandler):
             # Send error message to current user
             yield from current_connection.send(response_message)
 
-class GetHistoryMessage(object):
+class GetHistoryMessage(MessageHandler):
     """
     Get history message of current user
     """
     __msgtype__ = MessageType.HISTORY_MESSAGE
 
-    def handler(self, msg, connection):
+    def handle(self, msg, connection):
         recv = msg.recv
         offset = msg.offset
         count = msg.count
