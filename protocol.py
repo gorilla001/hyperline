@@ -88,7 +88,7 @@ class Connection(object):
     __slots__ = ['uid', 'name',  'path', 'transport',
                  'timeout', '_loop', '_timeout_handler', 'manager']
 
-    def __init__(self, ws, path, timeout=10):
+    def __init__(self, ws, path, timeout=1800):
         self.uid = None  # client id
         self.name = None  # client name
 

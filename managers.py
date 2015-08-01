@@ -4,19 +4,19 @@ __author__ = 'nmg'
 from meta import MetaConnection
 import asyncio
 
-class ConnectionManager(metaclass=MetaConnection):
+class ConnectionManagerProxy(metaclass=MetaConnection):
     """
-    Connection manager for managing all other managers
+    Connection manager proxy.
     """
-    @staticmethod
-    def add_connection(connection):
-        """
-        Add connection in connection manager according connection.path attribute
-        """
-        if connection.path == '/service':
-            CustomServiceConnectionManager().add_connection(connection)
+    def __init__(self, connection):
         if connection.path == '/':
-            NormalUserConnectionManager().add_connection(connection)
+            self._connection_manager = NormalUserConnectionManager()
+        if connection.path == '/service':
+            self._connection_manager = CustomServiceConnectionManager()
+
+    def __getattr__(self, method):
+        return getattr(self._connection_manager, method)
+
 
 class Manager(metaclass=MetaConnection):
     """
@@ -118,5 +118,10 @@ class CustomServiceConnectionManager(Manager):
         self.looping_call()
 
 if __name__ == '__main__':
-    pass
+    from collections import namedtuple
+    Connection = namedtuple('Connection', ['path'])
+    _connection = Connection('/service')
+    manager_proxy = ConnectionManagerProxy(_connection)
+    print(manager_proxy.add_connection)
+    manager_proxy.add_connection()
 
