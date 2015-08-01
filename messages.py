@@ -171,7 +171,7 @@ class TextMessage(Message):
             uid = msg['uid']
             recv = msg['recv']
             content = msg['content']
-            timestamp = time.time()
+            timestamp = round(time.time() * 1000)
         except KeyError:
             raise MessageFormatError('Malformed msg {}'.format(msg))
 
@@ -333,14 +333,23 @@ class HistoryMessage(object):
 
     def __init__(self):
         self.messages = []
+        self._total = 0
 
     def append(self, msg):
         if msg not in self.messages:
             self.messages.append(msg)
 
     @property
+    def total(self):
+        return self._total
+
+    @total.setter
+    def total(self, val):
+        self._total = val
+
+    @property
     def json(self):
-        return {'type': self.__msgtype__.value, 'body': self.messages}
+        return {'type': self.__msgtype__.value, 'body': {'msgs': self.messages, 'total': self._total}}
 
 if __name__ == '__main__':
     _msg = {'type': 'register', 'uid': '123456', 'role': '0'}

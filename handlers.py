@@ -331,7 +331,7 @@ class GetHistoryMessage(MessageHandler):
         history_messages = yield from self.get_history_msgs(recv, offset, count)
         print('history messages:', history_messages)
 
-        yield from self.send_history_msgs(history_messages, connection)
+        yield from self.send_history_msgs(history_messages, connection, recv)
 
     @asyncio.coroutine
     def get_history_msgs(self, recv, offset, count):
@@ -340,32 +340,35 @@ class GetHistoryMessage(MessageHandler):
         return self._mongodb.get_msgs_by_count(recv=recv, offset=offset, count=count)
 
     @asyncio.coroutine
-    def send_history_msgs(self, history_msgs, connection):
+    def send_history_msgs(self, history_msgs, connection, recv):
         """
         Send offline msgs to current user
         """
+        message = HistoryMessage()
+        total_message = self.total_message(recv=recv)
         for msg in history_msgs:
-            print(msg)
             del msg['_id']
-            message = HistoryMessage()
             message.append(msg['body'])
-            try:
-                # Normal Socket use method `write` to send message, while Web Socket use method `send`
-                # For Web Socket, just send raw message
-                # FIXME: try to determine connection type by connection attribute
-                if connection.is_websocket:
-                    yield from connection.send(message)
-                else:
-                    connection.write(message)
-                # if hasattr(transport, 'write'):
-                #     # Pack message as length-prifixed and send to receiver.
-                #     transport.write(message)
-                # else:
-                #     # Send raw message directly
-                #     yield from transport.send(message)
-            except Exception:
-                raise
+        message.total = total_message
+        try:
+            # Normal Socket use method `write` to send message, while Web Socket use method `send`
+            # For Web Socket, just send raw message
+            # FIXME: try to determine connection type by connection attribute
+            if connection.is_websocket:
+                yield from connection.send(message)
+            else:
+                connection.write(message)
+            # if hasattr(transport, 'write'):
+            #     # Pack message as length-prifixed and send to receiver.
+            #     transport.write(message)
+            # else:
+            #     # Send raw message directly
+            #     yield from transport.send(message)
+        except Exception:
+            raise
 
+    def total_message(self, recv):
+        return self._mongodb.total_message(recv=recv)
 
 class ErrorHandler(MessageHandler):
     """

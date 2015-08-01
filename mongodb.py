@@ -86,7 +86,15 @@ class MongoProxy(object):
         @return: history messages
         """
         coll = self.connection[self.db][invent]
-        return coll.find({'body.recv': recv}).skip(offset).limit(count)
+        return coll.find({'body.recv': recv}).sort([('body.timestamp', 1)]).skip(offset).limit(count)
+
+    def total_message(self, recv, invent='messages'):
+        """
+        Get messages total count
+        """
+        coll = self.connection[self.db][invent]
+        return coll.find({'body.recv': recv}).count()
+
 
 class RedisProxy(object):
     def __init__(self, host, port):
@@ -127,10 +135,11 @@ class RedisProxy(object):
 
 if __name__ == '__main__':
     import constant as cfg
-    _proxy= MongoClient(cfg.mongo_host, cfg.mongo_port)
+    _proxy = MongoClient(cfg.mongo_host, cfg.mongo_port)
     _coll = _proxy['hyperline']['messages']
-    result = _coll.find({'body.recv': 100})
-    for res in result:
-        print(res)
-    print(result)
+    _coll.remove()
+    # result = _coll.find({'body.recv': 100})
+    # for res in result:
+    #     print(res)
+    # print(result)
 
