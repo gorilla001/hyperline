@@ -86,7 +86,7 @@ class Connection(object):
     has no `touch` called, the connection will be closed.
     """
     __slots__ = ['uid', 'name',  'path', 'transport',
-                 'timeout', '_loop', '_timeout_handler', 'manager']
+                 'timeout', '_loop', '_timeout_handler', '_manager']
 
     def __init__(self, ws, path, timeout=1800):
         self.uid = None  # client id
@@ -94,6 +94,8 @@ class Connection(object):
 
         self.path = path
         self.transport = ws  # client connection
+
+        self._manager = None
 
         # self.associated_sessions = {}
 
@@ -172,6 +174,14 @@ class Connection(object):
         If connection is not closed, return True; otherwise return Fasle
         """
         return self.transport.state == 1
+
+    @property
+    def manager(self):
+        return self._manager
+
+    @manager.setter
+    def manager(self, manager):
+        self._manager = manager
 
 
 # class Connection(object):

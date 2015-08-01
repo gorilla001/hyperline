@@ -4,6 +4,7 @@ from meta import MetaMessage
 import time
 from enum import Enum
 import log as logging
+import traceback
 
 __all__ = ['MessageType',
            'MessageFormatError',
@@ -55,10 +56,10 @@ class Message(metaclass=MetaMessage):
 
         try:
             return self._msg_factories[msg['type']].factory(msg)
-        except TypeError:
-            logger.error("Malformed msg {}.".format(msg))
-        except KeyError:
-            raise MessageFormatError("Malformed msg {}.".format(msg))
+        except (TypeError, KeyError):
+            traceback.print_exc()
+        finally:
+            raise MessageFormatError()
 
 class RegisterMessage(Message):
     """
@@ -298,7 +299,7 @@ class UserMessage(object):
     def json(self):
         return {'type': self.__msgtype__.value, 'body': self.users}
 
-class GetHistoryMessage(object):
+class GetHistoryMessage(Message):
     """
     Get user history message
 
