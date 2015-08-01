@@ -58,7 +58,6 @@ class Message(metaclass=MetaMessage):
             return self._msg_factories[msg['type']].factory(msg)
         except (TypeError, KeyError):
             traceback.print_exc()
-        finally:
             raise MessageFormatError()
 
 class RegisterMessage(Message):
