@@ -319,19 +319,19 @@ class GetHistoryMessage(object):
     __msgtype__ = MessageType.HISTORY_MESSAGE
 
     def handler(self, msg, connection):
-        uid = connection.uid
+        recv = msg.recv
         offset = msg.offset
         count = msg.count
         transport = connection.transport
 
-        history_messages = yield from self.get_history_msgs(uid, offset, count)
+        history_messages = yield from self.get_history_msgs(recv, offset, count)
 
         yield from self.send_history_msgs(history_messages, transport)
 
     @asyncio.coroutine
-    def get_history_msgs(self, uid, offset, count):
+    def get_history_msgs(self, recv, offset, count):
         # Get offline msg from mongodb.
-        return self._mongodb.get_msgs_by_count(recv=uid, offset=offset, count=count)
+        return self._mongodb.get_msgs_by_count(recv=recv, offset=offset, count=count)
 
     @asyncio.coroutine
     def send_history_msgs(self, history_msgs, transport):
