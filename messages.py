@@ -203,7 +203,7 @@ class TextMessage(Message):
     # {'type': '1', 'body': { 'from': '', 'recv': ' ', 'content': ' '}}
     {'type': '1', 'body': { 'sndr': '', 'recv': ' ', 'content': ' '}}
     """
-    __msgtype__ = MessageType.MESSAGE
+    __msgtype__ = MessageType.TEXT_MESSAGE
 
     def __init__(self, sndr, recv, content, timestamp=None):
         self.sndr = sndr
