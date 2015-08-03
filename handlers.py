@@ -175,8 +175,8 @@ class SendTextMsg(MessageHandler):
         Send message to receiver if receiver is online, and
         save message to mongodb. Otherwise save
         message to mongodb as offline message.
-        :param msg: message to send
-        :return: None
+        @param msg: message to send
+        @return: None
         """
         # current_connection = connection
         # _session = current_connection.associated_sessions.get(int(msg.recv), None)
@@ -329,7 +329,6 @@ class GetHistoryMessage(MessageHandler):
         count = msg.count
 
         history_messages = yield from self.get_history_msgs(recv, offset, count)
-        print('history messages:', history_messages)
 
         yield from self.send_history_msgs(history_messages, connection, recv)
 

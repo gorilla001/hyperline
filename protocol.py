@@ -171,7 +171,7 @@ class Connection(object):
     @property
     def is_open(self):
         """
-        If connection is not closed, return True; otherwise return Fasle
+        If connection is not closed, return True; otherwise return False.
         """
         return self.transport.state == 1
 

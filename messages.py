@@ -154,7 +154,7 @@ class TextMessage(Message):
     # {'type': 'message', 'body': {'receiver': '5678', 'content': 'hello'}}
     # {'type': 'message', 'body': {'recipient': 'recipient','role': 'role', 'content': 'content'}}
     # {'type': '1', 'body': { 'recv': ' ', 'content': ' '}}
-    {'type': '1', 'body': { 'uid': '', 'recv': ' ', 'content': ' '}}
+    {'type': '1', 'body': { 'from': '', 'recv': ' ', 'content': ' '}}
     """
     __msgtype__ = MessageType.MESSAGE
 
