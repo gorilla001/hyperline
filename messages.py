@@ -28,9 +28,10 @@ class MessageType(Enum):
     CUSTOM_SERVICE = 'custom_service'
     CUSTOM_SERVICE_ACK = 'custom_service_ack'
     CUSTOM_SERVICE_READY = 'custom_service_ready'
-    HISTORY_MESSAGE = 'history_message'
-    HISTORY_MESSAGE_ACK = 'history_message_ack'
+    HISTORY_MESSAGE = 'history'
+    HISTORY_MESSAGE_ACK = 'history_ack'
     TEXT_MESSAGE = 'txt'
+    TEXT_MESSAGE_ACK = 'txt_ack'
     UNREGISTER = '2'
     READY = '3'
     REPLY = '4'
@@ -215,7 +216,7 @@ class HistoryMessage(Message):
     """
     Get user history message
 
-    {'type': '15', 'body': {'sndr': 200, 'recv': 100, 'offset': 0, 'count': 10}}
+    {'type': 'history', 'body': {'sndr': 200, 'recv': 100, 'offset': 0, 'count': 10}}
     """
     __msgtype__ = MessageType.HISTORY_MESSAGE
 
