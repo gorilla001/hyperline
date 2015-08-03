@@ -99,6 +99,12 @@ class LoginMessage(Message):
         except KeyError:
             raise MessageFormatError("Malformed msg {}".format(msg))
 
+        if not validate_int()(uid):
+            raise ValidatedError('uid must be integer')
+
+        if not validate_str()(name):
+            raise ValidatedError("name must be string")
+
         return cls(uid, name)
 
     @property
