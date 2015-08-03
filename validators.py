@@ -1,6 +1,6 @@
 __author__ = 'nmg'
 
-
+import six
 # def validate_json():
 #     """
 #     If message is json object, return True; else return False.
@@ -34,3 +34,15 @@ def validate_int():
         return True
 
     return _do
+
+def validate_str():
+    """
+    Validate str value
+    """
+    def _do(val):
+        if not isinstance(val, six.string_types):
+            return False
+
+        return True
+    return _do
+

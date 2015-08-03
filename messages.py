@@ -5,6 +5,7 @@ import time
 from enum import Enum
 import log as logging
 import traceback
+from validators import validate_int, validate_str
 
 __all__ = ['MessageType',
            'MessageFormatError',
@@ -176,12 +177,24 @@ class TextMessage(Message):
         except KeyError:
             raise MessageFormatError('Malformed msg {}'.format(msg))
 
+        if not validate_int()(sndr):
+            logger.error("sndr must be integer!!!")
+            raise MessageFormatError()
+
+        if not validate_int()(recv):
+            logger.error("recv must be integer!!!")
+            raise MessageFormatError()
+
+        if not validate_str()(content):
+            logger.error("content must be string!!!")
+            raise MessageFormatError()
+
         return cls(sndr, recv, content, timestamp)
 
     @property
     def json(self):
         return {'type': self.__msgtype__.value,
-                'body': {'uid': self.uid, 'recv': self.recv, 'content': self.content, 'timestamp': self.timestamp}}
+                'body': {'sndr': self.sndr, 'recv': self.recv, 'content': self.content, 'timestamp': self.timestamp}}
 
 class UnregisterMessage(Message):
     """
