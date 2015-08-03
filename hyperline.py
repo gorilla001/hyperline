@@ -88,6 +88,8 @@ class WSHyperLine(WSProtocol):
             return self.handler.handle(self.message(message), connection)
         except ValidatedError as exc:
             return logger.error(exc.args[0])
+        except MessageFormatError as exc:
+            return logger.error(exc.args[0])
 
 class HyperLineServer(object):
     def __init__(self, protocol_factory, host, port, ws_host, ws_port):

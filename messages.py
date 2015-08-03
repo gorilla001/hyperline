@@ -39,11 +39,12 @@ class MessageType(Enum):
     UNKNOWN = '404'
 
 class MessageFormatError(Exception):
-    def __init__(self, err_msg=None):
-        self.err_msg = err_msg if not None else "Malformed msg"
-
-    def __str__(self):
-        return 'MessageFormatError: {}'.format(self.err_msg)
+    """raise when message format is incorrect"""
+    # def __init__(self, err_msg=None):
+    #     self.err_msg = err_msg if not None else "Malformed msg"
+    #
+    # def __str__(self):
+    #     return 'MessageFormatError: {}'.format(self.err_msg)
 
 class Message(metaclass=MetaMessage):
     """
