@@ -26,40 +26,37 @@ def validate_format():
 
     return _do
 
-def validate_int(*args):
+def validate_int():
     """
     Validate int value
 
-    FIXME: If it is better to implemented this method as a decorator?
+    # FIXME: If it is better to implemented this method as a decorator?
+    FIXED(nmg)
     """
-    # def _do(val):
-    #     if not isinstance(val, int):
-    #         return False
-    #
-    #     return True
-    #
-    # return _do
-    for arg in args:
-        if not isinstance(arg, int):
-            raise ValidatedError(arg)
+    def _do(val):
+        if not isinstance(val, int):
+            return False
+
+        return True
+
+    return _do
+    # for arg in args:
+    #     if not isinstance(arg, int):
+    #         raise ValidatedError(arg)
 
 
-def validate_str(val):
+def validate_str():
     """
     Validate str value
 
-    FIXME: If it is better to implemented this method as a decorator?
+    # FIXME: If it is better to implemented this method as a decorator?
+    FIXED(nmg)
     """
-    # def _do(val):
-    #     if not isinstance(val, six.string_types):
-    #         return False
-    #
-    #     return True
-    # return _do
-    if not isinstance(val, six.string_types):
-        raise ValidatedError(val)
+    def _do(val):
+        if not isinstance(val, six.string_types):
+            return False
 
-if __name__ == '__main__':
-    # validate_int('test must be integer')
-    a = 10
-    print(a.__name__)
+        return True
+    return _do
+    # if not isinstance(val, six.string_types):
+    #     raise ValidatedError(val)
