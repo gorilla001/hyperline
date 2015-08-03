@@ -178,7 +178,7 @@ class CustomService(Message):
         # return {'type': self.__msgtype__.value, 'body': {'content': self.content}}
         return {'type': self.__msgtype__.value}
 
-class RequestForServiceResponse(object):
+class CustomServiceAck(object):
     """
     Message: {'type': '13', body: {'status': 200, 'uid': self.uid, 'name': self.name}}
     """
