@@ -26,6 +26,7 @@ class MessageType(Enum):
     LOGIN = 'login'
     LOGIN_ACK = 'login_ack'
     CUSTOM_SERVICE = 'custom_service'
+    CUSTOM_SERVICE_ACK = 'custom_service_ack'
     TEXT_MESSAGE = 'txt'
     UNREGISTER = '2'
     READY = '3'
@@ -181,7 +182,7 @@ class RequestForServiceResponse(object):
     """
     Message: {'type': '13', body: {'status': 200, 'uid': self.uid, 'name': self.name}}
     """
-    __msgtype__ = MessageType.REQUEST_SERVICE_RESPONSE
+    __msgtype__ = MessageType.CUSTOM_SERVICE_ACK
 
     def __init__(self, status=None, uid=None, name=None):
         self.status = status
