@@ -26,7 +26,7 @@ def validate_format():
 
     return _do
 
-def validate_int(val):
+def validate_int(*args):
     """
     Validate int value
 
@@ -39,8 +39,9 @@ def validate_int(val):
     #     return True
     #
     # return _do
-    if not isinstance(val, int):
-        raise ValidatedError(val)
+    for arg in args:
+        if not isinstance(arg, int):
+            raise ValidatedError(arg)
 
 
 def validate_str(val):
