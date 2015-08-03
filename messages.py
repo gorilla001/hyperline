@@ -24,6 +24,7 @@ class MessageType(Enum):
     Message type
     """
     LOGIN = 'login'
+    LOGIN_ACK = 'login_ack'
     TEXT_MESSAGE = 'txt'
     UNREGISTER = '2'
     READY = '3'
@@ -110,6 +111,41 @@ class LoginMessage(Message):
     @property
     def json(self):
         return {'type': self.__msgtype__, 'uid': self.uid, 'name': self.name}
+
+# Internal message
+class LoginSucceed(object):
+    """
+    Used for register reply while register succeed.
+
+    Message: {'type': '5', body: {'status': 200}}
+    """
+    __msgtype__ = MessageType.LOGIN_ACK
+
+    def __init__(self, status=200):
+        self.status = status
+
+    @property
+    def json(self):
+        return {'type': self.__msgtype__.value, 'body': {'status': self.status}}
+
+# Internal message
+class LoginFailed(object):
+    """
+    Used for reply while register failed.
+
+    Message: {'type': '5', 'body': {'status': 500, 'reason': ''}}
+
+    """
+    __msgtype__ = MessageType.LOGIN_ACK
+
+    def __init__(self, status=500, reason=''):
+        self.status = status
+        self.reason = reason
+
+    @property
+    def json(self):
+        return {'type': self.__msgtype__.value, 'body': {'status': 500, 'reason': self.reason}}
+
 
 class RequestForService(Message):
     """
@@ -274,39 +310,6 @@ class ReadyMessage(object):
     def json(self):
         return {'type': self.__msgtype__.value, 'body': {'uid': self.uid, 'name': self.name}}
 
-# Internal message
-class RegisterSucceed(object):
-    """
-    Used for register reply while register succeed.
-
-    Message: {'type': '5', body: {'status': 200}}
-    """
-    __msgtype__ = MessageType.REGISTER_RESPONSE
-
-    def __init__(self, status=200):
-        self.status = status
-
-    @property
-    def json(self):
-        return {'type': self.__msgtype__.value, 'body': {'status': self.status}}
-
-# Internal message
-class RegisterFailed(object):
-    """
-    Used for reply while register failed.
-
-    Message: {'type': '5', 'body': {'status': 500, 'reason': ''}}
-
-    """
-    __msgtype__ = MessageType.REGISTER_RESPONSE
-
-    def __init__(self, status=500, reason=''):
-        self.status = status
-        self.reason = reason
-
-    @property
-    def json(self):
-        return {'type': self.__msgtype__.value, 'body': {'status': 500, 'reason': self.reason}}
 
 # Internal message
 class UserMessage(object):
