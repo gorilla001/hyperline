@@ -5,7 +5,7 @@ import time
 from enum import Enum
 import log as logging
 import traceback
-from validators import validate_int, validate_str
+from validators import validate_int, validate_str, ValidatedError
 
 __all__ = ['MessageType',
            'MessageFormatError',
@@ -177,17 +177,35 @@ class TextMessage(Message):
         except KeyError:
             raise MessageFormatError('Malformed msg {}'.format(msg))
 
-        if not validate_int()(sndr):
-            logger.error("sndr must be integer!!!")
+        # Try to validate msg fields, if failed exception will be raised
+        try:
+            # validated `sndr` as integer
+            validate_int(sndr)
+
+            # validated `recv` as integer
+            validate_int(recv)
+
+            # validated `timestamp` as integer
+            validate_int(timestamp)
+
+            # validated `content` as string
+            validate_str(content)
+        except ValidatedError as exc:
+            # if validated exception occured, print error log and raise MessageFormatError
+            logger.error(exc.args[0])
             raise MessageFormatError()
 
-        if not validate_int()(recv):
-            logger.error("recv must be integer!!!")
-            raise MessageFormatError()
-
-        if not validate_str()(content):
-            logger.error("content must be string!!!")
-            raise MessageFormatError()
+        # if not validate_int()(sndr):
+        #     logger.error("sndr must be integer!!!")
+        #     raise MessageFormatError()
+        #
+        # if not validate_int()(recv):
+        #     logger.error("recv must be integer!!!")
+        #     raise MessageFormatError()
+        #
+        # if not validate_str()(content):
+        #     logger.error("content must be string!!!")
+        #     raise MessageFormatError()
 
         return cls(sndr, recv, content, timestamp)
 

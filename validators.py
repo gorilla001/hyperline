@@ -59,4 +59,4 @@ def validate_str(val):
         raise ValidatedError(val)
 
 if __name__ == '__main__':
-    validate_int('test')
+    validate_int('test must be integer')
