@@ -269,6 +269,32 @@ class HistoryMessageAck(object):
     def json(self):
         return {'type': self.__msgtype__.value, 'body': {'msgs': self.messages, 'total': self._total}}
 
+class SessionList(Message):
+    """
+    Get current session list
+    """
+    __msgtype__ = MessageType.SESSION_LIST
+
+    def __init__(self, uid):
+        self.uid = uid
+
+    @classmethod
+    def factory(cls, msg):
+        msg = msg['body']
+        try:
+            uid = msg['uid']
+        except KeyError:
+            raise MessageFormatError('uid is not specified')
+
+        if not validate_int()(uid):
+            raise ValidatedError('uid must be integer')
+
+        return cls(uid)
+
+    @property
+    def json(self):
+        return {'type': self.__msgtype__.value, 'body': {'uid': self.uid}}
+
 class TextMessage(Message):
     """
     Message should like this:
