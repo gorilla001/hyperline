@@ -60,4 +60,6 @@ def validate_str(val):
         raise ValidatedError(val)
 
 if __name__ == '__main__':
-    validate_int('test must be integer')
+    # validate_int('test must be integer')
+    a = 10
+    print(a.__name__)

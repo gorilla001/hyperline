@@ -179,15 +179,8 @@ class TextMessage(Message):
 
         # Try to validate msg fields, if failed exception will be raised
         try:
-            # validated `sndr` as integer
-            validate_int(sndr)
-
-            # validated `recv` as integer
-            validate_int(recv)
-
-            # validated `timestamp` as integer
-            validate_int(timestamp)
-
+            # validated `sndr` `recv` and `timestamp` as integer
+            validate_int(sndr, recv, content)
             # validated `content` as string
             validate_str(content)
         except ValidatedError as exc:
