@@ -25,6 +25,7 @@ class MessageType(Enum):
     """
     LOGIN = 'login'
     LOGIN_ACK = 'login_ack'
+    CUSTOM_SERVICE = 'custom_service'
     TEXT_MESSAGE = 'txt'
     UNREGISTER = '2'
     READY = '3'
@@ -147,7 +148,7 @@ class LoginFailed(object):
         return {'type': self.__msgtype__.value, 'body': {'status': 500, 'reason': self.reason}}
 
 
-class RequestForService(Message):
+class RequestCustomService(Message):
     """
     Ask for specified service, such as custom service or sports man service.
 
