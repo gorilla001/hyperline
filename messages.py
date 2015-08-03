@@ -390,34 +390,34 @@ class UnregisterMessage(Message):
 
         return cls(uid)
 
-class ReplyMessage(Message):
-    """
-    Used for sender back to client with custom service id
-
-    Message should like this:
-
-    {'type': 'reply', 'body': {'status': 200, 'content': 'message-content'}
-
-    """
-    __msgtype__ = MessageType.REPLY
-
-    def __init__(self, status, content):
-        self.status = status
-        self.content = content
-
-    @classmethod
-    def factory(cls, msg):
-        try:
-            status = msg['status']
-            content = msg['content']
-        except KeyError:
-            raise MessageFormatError("Malformed msg {}".format(msg))
-
-        return cls(status, content)
-
-    @property
-    def json(self):
-        return {'type': self.__msgtype__, 'body': {'status': self.status, 'cs_id': self.cs_id}}
+# class ReplyMessage(Message):
+#     """
+#     Used for sender back to client with custom service id
+#
+#     Message should like this:
+#
+#     {'type': 'reply', 'body': {'status': 200, 'content': 'message-content'}
+#
+#     """
+#     __msgtype__ = MessageType.REPLY
+#
+#     def __init__(self, status, content):
+#         self.status = status
+#         self.content = content
+#
+#     @classmethod
+#     def factory(cls, msg):
+#         try:
+#             status = msg['status']
+#             content = msg['content']
+#         except KeyError:
+#             raise MessageFormatError("Malformed msg {}".format(msg))
+#
+#         return cls(status, content)
+#
+#     @property
+#     def json(self):
+#         return {'type': self.__msgtype__, 'body': {'status': self.status, 'cs_id': self.cs_id}}
 
 
 
