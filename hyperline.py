@@ -11,7 +11,7 @@ from handlers import MessageHandler
 # from session import SessionManager
 from messages import Message
 from messages import MessageFormatError
-from validators import validate_format
+from validators import validate_format, ValidatedError
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +84,10 @@ class WSHyperLine(WSProtocol):
             return
 
         logger.info("Send message {}".format(message))
-        return self.handler.handle(self.message(message), connection)
+        try:
+            return self.handler.handle(self.message(message), connection)
+        except ValidatedError as exc:
+            return logger.error(exc.args[0])
 
 class HyperLineServer(object):
     def __init__(self, protocol_factory, host, port, ws_host, ws_port):
