@@ -154,12 +154,13 @@ class TextMessage(Message):
     # {'type': 'message', 'body': {'receiver': '5678', 'content': 'hello'}}
     # {'type': 'message', 'body': {'recipient': 'recipient','role': 'role', 'content': 'content'}}
     # {'type': '1', 'body': { 'recv': ' ', 'content': ' '}}
-    {'type': '1', 'body': { 'from': '', 'recv': ' ', 'content': ' '}}
+    # {'type': '1', 'body': { 'from': '', 'recv': ' ', 'content': ' '}}
+    {'type': '1', 'body': { 'sndr': '', 'recv': ' ', 'content': ' '}}
     """
     __msgtype__ = MessageType.MESSAGE
 
-    def __init__(self, uid, recv, content, timestamp=None):
-        self.uid = uid
+    def __init__(self, sndr, recv, content, timestamp=None):
+        self.sndr = sndr
         self.recv = recv
         self.content = content
         self.timestamp = timestamp
@@ -168,14 +169,14 @@ class TextMessage(Message):
     def factory(cls, msg):
         msg = msg['body']
         try:
-            uid = msg['uid']
+            sndr = msg['sndr']
             recv = msg['recv']
             content = msg['content']
             timestamp = round(time.time() * 1000)
         except KeyError:
             raise MessageFormatError('Malformed msg {}'.format(msg))
 
-        return cls(uid, recv, content, timestamp)
+        return cls(sndr, recv, content, timestamp)
 
     @property
     def json(self):
