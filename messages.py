@@ -23,8 +23,8 @@ class MessageType(Enum):
     """
     Message type
     """
-    REGISTER = '0'
-    MESSAGE = '1'
+    LOGIN = 'login'
+    TEXT_MESSAGE = 'txt'
     UNREGISTER = '2'
     READY = '3'
     REPLY = '4'
