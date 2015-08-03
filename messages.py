@@ -149,7 +149,7 @@ class LoginFailed(object):
         return {'type': self.__msgtype__.value, 'body': {'status': 500, 'reason': self.reason}}
 
 
-class RequestCustomService(Message):
+class CustomService(Message):
     """
     Ask for specified service, such as custom service or sports man service.
 
