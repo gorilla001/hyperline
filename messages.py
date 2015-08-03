@@ -295,6 +295,26 @@ class SessionList(Message):
     def json(self):
         return {'type': self.__msgtype__.value, 'body': {'uid': self.uid}}
 
+# internal message
+class SessionListAck(object):
+    """
+     Used for return current session list
+    """
+
+    __msgtype__ = MessageType.SESSION_LIST_ACK
+
+    def __init__(self):
+        self.users = []
+
+    def append(self, uid, name):
+        user = {'uid': uid, 'name': name}
+        if user not in self.users:
+            self.users.append(user)
+
+    @property
+    def json(self):
+        return {'type': self.__msgtype__.value, 'body': self.users}
+
 class TextMessage(Message):
     """
     Message should like this:
@@ -404,22 +424,7 @@ class ReplyMessage(Message):
 
 # Internal message
 class UserMessage(object):
-    """
 
-    """
-    __msgtype__ = MessageType.ASSOCIATED_USERS
-
-    def __init__(self):
-        self.users = []
-
-    def append(self, uid, name):
-        user = {'uid': uid, 'name': name}
-        if user not in self.users:
-            self.users.append(user)
-
-    @property
-    def json(self):
-        return {'type': self.__msgtype__.value, 'body': self.users}
 
 
 
