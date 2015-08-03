@@ -157,7 +157,7 @@ class RequestCustomService(Message):
     # {'type': '12', 'body': {'content': '10'}}
     {'type': '12'}
     """
-    __msgtype__ = MessageType.REQUEST_SERVICE
+    __msgtype__ = MessageType.CUSTOM_SERVICE
 
     # def __init__(self, content):
     #     self.content = content
