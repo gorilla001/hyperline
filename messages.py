@@ -211,7 +211,7 @@ class CustomServiceReady(object):
     def json(self):
         return {'type': self.__msgtype__.value, 'body': {'uid': self.uid, 'name': self.name}}
 
-class GetHistoryMessage(Message):
+class HistoryMessage(Message):
     """
     Get user history message
 
