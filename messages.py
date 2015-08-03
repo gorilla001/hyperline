@@ -34,16 +34,17 @@ class MessageType(Enum):
     TEXT_MESSAGE_ACK = 'txt_ack'
     SESSION_LIST = 'session_list'
     SESSION_LIST_ACK = 'session_list_ack'
-    UNREGISTER = '2'
-    READY = '3'
-    REPLY = '4'
-    HEARTBEAT = '5'
-
-    REGISTER_RESPONSE = '11'
-    REQUEST_SERVICE = '12'
-    REQUEST_SERVICE_RESPONSE = '13'
-    ASSOCIATED_USERS = '14'
-    HISTORY_MESSAGE = '15'
+    LOGOUT = 'logout'
+    # UNREGISTER = '2'
+    # READY = '3'
+    # REPLY = '4'
+    # HEARTBEAT = '5'
+    #
+    # REGISTER_RESPONSE = '11'
+    # REQUEST_SERVICE = '12'
+    # REQUEST_SERVICE_RESPONSE = '13'
+    # ASSOCIATED_USERS = '14'
+    # HISTORY_MESSAGE = '15'
 
     UNKNOWN = '404'
 
