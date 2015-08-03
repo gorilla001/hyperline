@@ -27,6 +27,7 @@ class MessageType(Enum):
     LOGIN_ACK = 'login_ack'
     CUSTOM_SERVICE = 'custom_service'
     CUSTOM_SERVICE_ACK = 'custom_service_ack'
+    CUSTOM_SERVICE_READY = 'custom_service_ready'
     TEXT_MESSAGE = 'txt'
     UNREGISTER = '2'
     READY = '3'
