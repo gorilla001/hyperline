@@ -29,6 +29,8 @@ def validate_format():
 def validate_int(val):
     """
     Validate int value
+
+    FIXME: If it is better to implemented this method as a decorator?
     """
     # def _do(val):
     #     if not isinstance(val, int):
@@ -44,6 +46,8 @@ def validate_int(val):
 def validate_str(val):
     """
     Validate str value
+
+    FIXME: If it is better to implemented this method as a decorator?
     """
     # def _do(val):
     #     if not isinstance(val, six.string_types):
