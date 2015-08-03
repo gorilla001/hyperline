@@ -178,27 +178,24 @@ class TextMessage(Message):
             raise MessageFormatError('Malformed msg {}'.format(msg))
 
         # Try to validate msg fields, if failed exception will be raised
-        try:
-            # validated `sndr` `recv` and `timestamp` as integer
-            validate_int(sndr, recv, content)
-            # validated `content` as string
-            validate_str(content)
-        except ValidatedError as exc:
-            # if validated exception occured, print error log and raise MessageFormatError
-            logger.error(exc.args[0])
-            raise MessageFormatError()
+        # try:
+        #     # validated `sndr` `recv` and `timestamp` as integer
+        #     validate_int(sndr, recv, content)
+        #     # validated `content` as string
+        #     validate_str(content)
+        # except ValidatedError as exc:
+        #     # if validated exception occured, print error log and raise MessageFormatError
+        #     logger.error(exc.args[0])
+        #     raise MessageFormatError()
 
-        # if not validate_int()(sndr):
-        #     logger.error("sndr must be integer!!!")
-        #     raise MessageFormatError()
-        #
-        # if not validate_int()(recv):
-        #     logger.error("recv must be integer!!!")
-        #     raise MessageFormatError()
-        #
-        # if not validate_str()(content):
-        #     logger.error("content must be string!!!")
-        #     raise MessageFormatError()
+        if not validate_int()(sndr):
+            raise ValidatedError("sndr must be integer")
+
+        if not validate_int()(recv):
+            raise ValidatedError("recv must be integer")
+
+        if not validate_str()(content):
+            raise ValidatedError("content must be string!!!")
 
         return cls(sndr, recv, content, timestamp)
 
