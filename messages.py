@@ -240,11 +240,11 @@ class HistoryMessage(Message):
         return cls(sndr, recv, offset, count)
 
 # Internal message
-class HistoryMessage(object):
+class HistoryMessageAck(object):
     """
-    History message send to uers
+    History messages
     """
-    __msgtype__ = MessageType.HISTORY_MESSAGE
+    __msgtype__ = MessageType.HISTORY_MESSAGE_ACK
 
     def __init__(self):
         self.messages = []
