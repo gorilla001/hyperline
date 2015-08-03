@@ -32,6 +32,8 @@ class MessageType(Enum):
     HISTORY_MESSAGE_ACK = 'history_ack'
     TEXT_MESSAGE = 'txt'
     TEXT_MESSAGE_ACK = 'txt_ack'
+    SESSION_LIST = 'session_list'
+    SESSION_LIST_ACK = 'session_list_ack'
     UNREGISTER = '2'
     READY = '3'
     REPLY = '4'
