@@ -28,6 +28,8 @@ class MessageType(Enum):
     CUSTOM_SERVICE = 'custom_service'
     CUSTOM_SERVICE_ACK = 'custom_service_ack'
     CUSTOM_SERVICE_READY = 'custom_service_ready'
+    HISTORY_MESSAGE = 'history_message'
+    HISTORY_MESSAGE_ACK = 'history_message_ack'
     TEXT_MESSAGE = 'txt'
     UNREGISTER = '2'
     READY = '3'
@@ -209,6 +211,59 @@ class CustomServiceReady(object):
     def json(self):
         return {'type': self.__msgtype__.value, 'body': {'uid': self.uid, 'name': self.name}}
 
+class GetHistoryMessage(Message):
+    """
+    Get user history message
+
+    {'type': '15', 'body': {'recv': 100, 'offset': 0, 'count': 10}}
+    """
+    __msgtype__ = MessageType.HISTORY_MESSAGE
+
+    def __init__(self, recv, offset, count):
+        self.recv = recv
+        self.offset = offset
+        self.count = count
+
+    @classmethod
+    def factory(cls, msg):
+        msg = msg['body']
+        try:
+            recv = msg['recv']
+            offset = msg['offset']
+            count = msg['count']
+        except KeyError:
+            traceback.print_exc()
+            raise MessageFormatError()
+
+        return cls(recv, offset, count)
+
+# Internal message
+class HistoryMessage(object):
+    """
+    History message send to uers
+    """
+    __msgtype__ = MessageType.HISTORY_MESSAGE
+
+    def __init__(self):
+        self.messages = []
+        self._total = 0
+
+    def append(self, msg):
+        if msg not in self.messages:
+            self.messages.append(msg)
+
+    @property
+    def total(self):
+        return self._total
+
+    @total.setter
+    def total(self, val):
+        self._total = val
+
+    @property
+    def json(self):
+        return {'type': self.__msgtype__.value, 'body': {'msgs': self.messages, 'total': self._total}}
+
 class TextMessage(Message):
     """
     Message should like this:
@@ -335,58 +390,7 @@ class UserMessage(object):
     def json(self):
         return {'type': self.__msgtype__.value, 'body': self.users}
 
-class GetHistoryMessage(Message):
-    """
-    Get user history message
 
-    {'type': '15', 'body': {'recv': 100, 'offset': 0, 'count': 10}}
-    """
-    __msgtype__ = MessageType.HISTORY_MESSAGE
-
-    def __init__(self, recv, offset, count):
-        self.recv = recv
-        self.offset = offset
-        self.count = count
-
-    @classmethod
-    def factory(cls, msg):
-        msg = msg['body']
-        try:
-            recv = msg['recv']
-            offset = msg['offset']
-            count = msg['count']
-        except KeyError:
-            traceback.print_exc()
-            raise MessageFormatError()
-
-        return cls(recv, offset, count)
-
-# Internal message
-class HistoryMessage(object):
-    """
-    History message send to uers
-    """
-    __msgtype__ = MessageType.HISTORY_MESSAGE
-
-    def __init__(self):
-        self.messages = []
-        self._total = 0
-
-    def append(self, msg):
-        if msg not in self.messages:
-            self.messages.append(msg)
-
-    @property
-    def total(self):
-        return self._total
-
-    @total.setter
-    def total(self, val):
-        self._total = val
-
-    @property
-    def json(self):
-        return {'type': self.__msgtype__.value, 'body': {'msgs': self.messages, 'total': self._total}}
 
 if __name__ == '__main__':
     _msg = {'type': 'register', 'uid': '123456', 'role': '0'}
