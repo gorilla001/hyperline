@@ -194,6 +194,21 @@ class CustomServiceAck(object):
     def json(self):
         return {'type': self.__msgtype__.value, 'body': {'status': self.status, 'uid': self.uid, 'name': self.name}}
 
+# Internal message
+class CustomServiceReady(object):
+    """
+    Used for telling custom service and normal user start conversation.
+    """
+    __msgtype__ = MessageType.CUSTOM_SERVICE_READY
+
+    def __init__(self, uid=None, name=None):
+        self.uid = uid
+        self.name = name
+
+    @property
+    def json(self):
+        return {'type': self.__msgtype__.value, 'body': {'uid': self.uid, 'name': self.name}}
+
 class TextMessage(Message):
     """
     Message should like this:
@@ -298,20 +313,7 @@ class ReplyMessage(Message):
     def json(self):
         return {'type': self.__msgtype__, 'body': {'status': self.status, 'cs_id': self.cs_id}}
 
-# Internal message
-class ReadyMessage(object):
-    """
-    Used for telling custom service and normal user start conversation.
-    """
-    __msgtype__ = MessageType.READY
 
-    def __init__(self, uid=None, name=None):
-        self.uid = uid
-        self.name = name
-
-    @property
-    def json(self):
-        return {'type': self.__msgtype__.value, 'body': {'uid': self.uid, 'name': self.name}}
 
 
 # Internal message
