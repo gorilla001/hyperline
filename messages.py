@@ -62,7 +62,7 @@ class Message(metaclass=MetaMessage):
             traceback.print_exc()
             raise MessageFormatError()
 
-class RegisterMessage(Message):
+class LoginMessage(Message):
     """
     Register message, message body should like this:
 
@@ -81,7 +81,7 @@ class RegisterMessage(Message):
         # #           2 - chat which sports man
 
         # {'type':'register', 'body': { 'uid': '1234', 'name': 'name', 'role': '0'}}
-        {'type':'register', 'body': {'uid': '1234', 'name': 'name'}}
+        {'type':'login', 'body': {'uid': '1234', 'name': 'name'}}
     """
 
     __msgtype__ = MessageType.REGISTER
