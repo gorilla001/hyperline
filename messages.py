@@ -215,11 +215,12 @@ class HistoryMessage(Message):
     """
     Get user history message
 
-    {'type': '15', 'body': {'recv': 100, 'offset': 0, 'count': 10}}
+    {'type': '15', 'body': {'sndr': 200, 'recv': 100, 'offset': 0, 'count': 10}}
     """
     __msgtype__ = MessageType.HISTORY_MESSAGE
 
-    def __init__(self, recv, offset, count):
+    def __init__(self, sndr, recv, offset, count):
+        self.sndr = sndr
         self.recv = recv
         self.offset = offset
         self.count = count
@@ -228,6 +229,7 @@ class HistoryMessage(Message):
     def factory(cls, msg):
         msg = msg['body']
         try:
+            sndr = msg['sndr']
             recv = msg['recv']
             offset = msg['offset']
             count = msg['count']
@@ -235,7 +237,7 @@ class HistoryMessage(Message):
             traceback.print_exc()
             raise MessageFormatError()
 
-        return cls(recv, offset, count)
+        return cls(sndr, recv, offset, count)
 
 # Internal message
 class HistoryMessage(object):
