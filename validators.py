@@ -12,6 +12,9 @@ import six
 #         except ValueError:
 #             return False
 #         return True
+class ValidatedError(Exception):
+    """Validate error"""
+
 def validate_format():
     """
     Validator message format
@@ -23,26 +26,33 @@ def validate_format():
 
     return _do
 
-def validate_int():
+def validate_int(val):
     """
     Validate int value
     """
-    def _do(val):
-        if not isinstance(val, int):
-            return False
+    # def _do(val):
+    #     if not isinstance(val, int):
+    #         return False
+    #
+    #     return True
+    #
+    # return _do
+    if not isinstance(val, int):
+        raise ValidatedError(val)
 
-        return True
 
-    return _do
-
-def validate_str():
+def validate_str(val):
     """
     Validate str value
     """
-    def _do(val):
-        if not isinstance(val, six.string_types):
-            return False
+    # def _do(val):
+    #     if not isinstance(val, six.string_types):
+    #         return False
+    #
+    #     return True
+    # return _do
+    if not isinstance(val, six.string_types):
+        raise ValidatedError(val)
 
-        return True
-    return _do
-
+if __name__ == '__main__':
+    validate_int('test')
