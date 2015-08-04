@@ -50,20 +50,11 @@ class MessageType(Enum):
 
 class MessageFormatError(Exception):
     """raise when message format is incorrect"""
-    # def __init__(self, err_msg=None):
-    #     self.err_msg = err_msg if not None else "Malformed msg"
-    #
-    # def __str__(self):
-    #     return 'MessageFormatError: {}'.format(self.err_msg)
 
 class Message(metaclass=MetaMessage):
     """
     Base class for message class
     """
-    # _struct_format = "!I"
-    #
-    # def pack(self, msg):
-    #     return pack("!I", len(msg)) + bytes(msg, encoding='utf-8')
     def __call__(self, msg):
 
         try:
@@ -74,24 +65,16 @@ class Message(metaclass=MetaMessage):
 
 class LoginMessage(Message):
     """
-    Register message, message body should like this:
+    Used for user login
 
-        # # {'type': 'register', 'uid': 'unique-user-id', 'role': 'user-role', 'service': 'the service will be called'}
-        # {'type': 'register', 'uid': 'unique-user-id', 'role': 'user-role'}
-        #
-        # @type: message type
-        # @uid:  message sender uid
-        # @role: message sender role
-        #        0 - normal user
-        #        1 - custom service
-        #        2 - sport man
-        # # @service: which service will be called
-        # #           0 - chat with normal user
-        # #           1 - chat with custom service
-        # #           2 - chat which sports man
+    Message Format:
 
-        # {'type':'register', 'body': { 'uid': '1234', 'name': 'name', 'role': '0'}}
-        {'type':'login', 'body': {'uid': '1234', 'name': 'name'}}
+    {'type':'login', 'body': {'uid': '1234', 'name': 'name'}}
+
+    @ type: message type
+    @ uid: user ID
+    @name: user name
+
     """
 
     __msgtype__ = MessageType.REGISTER
@@ -124,9 +107,15 @@ class LoginMessage(Message):
 # Internal message
 class LoginSucceed(object):
     """
-    Used for register reply while register succeed.
+    Used for indicated user login succeed
 
-    Message: {'type': '5', body: {'status': 200}}
+    Message Format:
+
+    {'type': 'login_ack', body: {'status': 200}}
+
+    @type: message type
+    @status: login status
+
     """
     __msgtype__ = MessageType.LOGIN_ACK
 
@@ -140,9 +129,15 @@ class LoginSucceed(object):
 # Internal message
 class LoginFailed(object):
     """
-    Used for reply while register failed.
+    Used for reply while login failed.
 
-    Message: {'type': '5', 'body': {'status': 500, 'reason': ''}}
+    Message Format:
+
+    {'type': 'login_ack', 'body': {'status': 500, 'reason': ''}}
+
+    @type: message type
+    @status: login status
+    @reason: the reason for login failed
 
     """
     __msgtype__ = MessageType.LOGIN_ACK
@@ -160,34 +155,35 @@ class CustomService(Message):
     """
     Ask for specified service, such as custom service or sports man service.
 
-    Message should like this:
+    Message Format:
 
-    # {'type': '12', 'body': {'content': '10'}}
-    {'type': '12'}
+    {'type': 'custom_service'}
+
+    @type: message type
     """
     __msgtype__ = MessageType.CUSTOM_SERVICE
 
-    # def __init__(self, content):
-    #     self.content = content
-
     @classmethod
     def factory(cls, _):
-        # try:
-        #     content = msg['content']
-        # except KeyError:
-        #     raise MessageFormatError("Malformed msg {}".format(msg))
-
-        # return cls(content)
         return cls()
 
     @property
     def json(self):
-        # return {'type': self.__msgtype__.value, 'body': {'content': self.content}}
         return {'type': self.__msgtype__.value}
 
 class CustomServiceAck(object):
     """
-    Message: {'type': '13', body: {'status': 200, 'uid': self.uid, 'name': self.name}}
+    Used for custom service reply for client
+
+    Message Format:
+
+    {'type': 'custom_service_ack', body: {'status': 200, 'uid': self.uid, 'name': self.name}}
+
+    @type: message type
+    @status: indicated if has found a custom service, 200 means found, 404 means not found.
+    @uid: custom service's ID, if not found, value will be null.
+    @name: custom service's Name, if not found, value will be null.
+
     """
     __msgtype__ = MessageType.CUSTOM_SERVICE_ACK
 
@@ -203,7 +199,15 @@ class CustomServiceAck(object):
 # Internal message
 class CustomServiceReady(object):
     """
-    Used for telling custom service and normal user start conversation.
+    Used for telling custom service for reading to start conversation.
+
+    Message format:
+
+    {'type': 'custom_service_ready', 'body': {'uid': 1234, 'name': 'jack'}}
+
+    @type: message type
+    @uid: client user ID
+    @name: client user Name
     """
     __msgtype__ = MessageType.CUSTOM_SERVICE_READY
 
@@ -219,7 +223,15 @@ class HistoryMessage(Message):
     """
     Get user history message
 
+    Message Format:
+
     {'type': 'history', 'body': {'sndr': 200, 'recv': 100, 'offset': 0, 'count': 10}}
+
+    @type: message type
+    @sndr: the current user's id
+    @recv: receiver user's id
+    @offset: indicated where to get messages
+    @count: how many messages will be retrieved
     """
     __msgtype__ = MessageType.HISTORY_MESSAGE
 
@@ -320,10 +332,6 @@ class TextMessage(Message):
     """
     Message should like this:
 
-    # {'type': 'message', 'body': {'receiver': '5678', 'content': 'hello'}}
-    # {'type': 'message', 'body': {'recipient': 'recipient','role': 'role', 'content': 'content'}}
-    # {'type': '1', 'body': { 'recv': ' ', 'content': ' '}}
-    # {'type': '1', 'body': { 'from': '', 'recv': ' ', 'content': ' '}}
     {'type': '1', 'body': { 'sndr': '', 'recv': ' ', 'content': ' '}}
     """
     __msgtype__ = MessageType.TEXT_MESSAGE
@@ -345,17 +353,6 @@ class TextMessage(Message):
         except KeyError:
             raise MessageFormatError('Malformed msg {}'.format(msg))
 
-        # Try to validate msg fields, if failed exception will be raised
-        # try:
-        #     # validated `sndr` `recv` and `timestamp` as integer
-        #     validate_int(sndr, recv, content)
-        #     # validated `content` as string
-        #     validate_str(content)
-        # except ValidatedError as exc:
-        #     # if validated exception occured, print error log and raise MessageFormatError
-        #     logger.error(exc.args[0])
-        #     raise MessageFormatError()
-
         if not validate_int()(sndr):
             raise ValidatedError("sndr must be integer")
 
@@ -372,11 +369,13 @@ class TextMessage(Message):
         return {'type': self.__msgtype__.value,
                 'body': {'sndr': self.sndr, 'recv': self.recv, 'content': self.content, 'timestamp': self.timestamp}}
 
-class UnregisterMessage(Message):
+class LogoutMessage(Message):
     """
     For user logout or connection lost
+
+    {'type': 'logout', 'body': {'uid': ''}}
     """
-    __msgtype__ = MessageType.UNREGISTER
+    __msgtype__ = MessageType.LOGOUT
 
     def __init__(self, uid):
         self.uid = uid
@@ -388,6 +387,9 @@ class UnregisterMessage(Message):
             uid = msg['uid']
         except KeyError:
             raise MessageFormatError("Malformed msg {}".format(msg))
+
+        if not validate_int()(uid):
+            raise ValidatedError("uid must be integer")
 
         return cls(uid)
 
@@ -419,14 +421,6 @@ class UnregisterMessage(Message):
 #     @property
 #     def json(self):
 #         return {'type': self.__msgtype__, 'body': {'status': self.status, 'cs_id': self.cs_id}}
-
-
-
-
-# Internal message
-class UserMessage(object):
-
-
 
 
 if __name__ == '__main__':
