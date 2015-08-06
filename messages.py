@@ -77,7 +77,7 @@ class LoginMessage(Message):
 
     """
 
-    __msgtype__ = MessageType.REGISTER
+    __msgtype__ = MessageType.LOGIN
 
     def __init__(self, uid, name):
         self.uid = uid
