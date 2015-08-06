@@ -34,6 +34,8 @@ class MessageType(Enum):
     TEXT_MESSAGE_ACK = 'txt_ack'
     SESSION_LIST = 'session_list'
     SESSION_LIST_ACK = 'session_list_ack'
+    HEARTBEAT = 'heartbeat'
+    HEARTBEAT_ACK = 'heartbeat_ack'
     LOGOUT = 'logout'
     # UNREGISTER = '2'
     # READY = '3'
