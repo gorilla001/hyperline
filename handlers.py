@@ -11,7 +11,7 @@ import logging
 # from session import SessionManager
 from managers import NormalUserConnectionManager, CustomServiceConnectionManager
 from mongodb import MongoProxy, RedisProxy
-from messages import MessageType, RegisterSucceed, RegisterFailed, ReadyMessage, RequestForServiceResponse, UserMessage
+from messages import MessageType, LoginSucceed, LoginFailed, CustomServiceReady, CustomService, SessionList
 from messages import HistoryMessage
 import constant as cfg
 
@@ -51,7 +51,7 @@ class MessageHandler(metaclass=MetaHandler):
         # raise AttributeError()
         return asyncio.async(_handler().handle(msg, connection))
 
-class Register(MessageHandler):
+class Login(MessageHandler):
     """
     Registry handler for handling clients registry.
 
@@ -60,7 +60,7 @@ class Register(MessageHandler):
         {'type': 'register', 'uid': 'unique-user-id'}
 
     """
-    __msgtype__ = MessageType.REGISTER
+    __msgtype__ = MessageType.LOGIN
 
     @asyncio.coroutine
     def handle(self, msg, connection):
@@ -110,17 +110,17 @@ class Register(MessageHandler):
     @asyncio.coroutine
     def register_succeed(self, connection):
         # Send successful reply
-        yield from connection.send(RegisterSucceed())
+        yield from connection.send(LoginSucceed())
 
     @asyncio.coroutine
     def register_failed(self, connection, exc):
         # Send successful failed
-        yield from connection.send(RegisterFailed(reason=str(exc)))
+        yield from connection.send(LoginFailed(reason=str(exc)))
 
     @asyncio.coroutine
     def send_associated_users(self, connection):
         # Get associated users of current user from redis
-        message = UserMessage()
+        message = SessionList()
         users = self._redis.get(connection.uid)
         if users is not None:
             for user in eval(users):
@@ -167,7 +167,7 @@ class SendTextMsg(MessageHandler):
         {'type': 'text', 'sender': 'Jack', 'receiver': 'Rose', 'content': 'I love you forever'}
 
     """
-    __msgtype__ = MessageType.MESSAGE
+    __msgtype__ = MessageType.TEXT_MESSAGE
 
     @asyncio.coroutine
     def handle(self, msg, connection):
@@ -233,7 +233,7 @@ class SendTextMsg(MessageHandler):
         logger.info("Save msg in mongodb {}".format(msg))
         self._mongodb.save_msg(msg)
 
-class Unregister(MessageHandler):
+class Logout(MessageHandler):
     """
     Unregister user from global session
 
@@ -242,7 +242,7 @@ class Unregister(MessageHandler):
         {'type': 'unregister', 'uid': 'unique-user-id'}
 
     """
-    __msgtype__ = MessageType.UNREGISTER
+    __msgtype__ = MessageType.LOGOUT
 
     @asyncio.coroutine
     def handle(self, msg, connection):
@@ -269,9 +269,9 @@ class HeartBeat(MessageHandler):
         session = self._session_manager.get_session(msg.uid)
         session.touch()
 
-class RequestForService(MessageHandler):
+class CustomService(MessageHandler):
 
-    __msgtype__ = MessageType.REQUEST_SERVICE
+    __msgtype__ = MessageType.CUSTOM_SERVICE
 
     @asyncio.coroutine
     def handle(self, msg, connection):
@@ -279,7 +279,7 @@ class RequestForService(MessageHandler):
             current_connection = connection
             custom_service = CustomServiceConnectionManager().get_connections().pop()
             # message = {'type': 'reply', 'body': {'status': 200, 'content': custom_service}}
-            ready_message = ReadyMessage()
+            ready_message = CustomServiceReady()
             ready_message.uid = current_connection.uid
             ready_message.name = current_connection.name
 
@@ -287,7 +287,7 @@ class RequestForService(MessageHandler):
             yield from custom_service.send(ready_message)
 
             # Send ready message to current user
-            response_message = RequestForServiceResponse()
+            response_message = CustomService()
             response_message.status = 200
             response_message.uid = custom_service.uid
             response_message.name = custom_service.name
@@ -316,7 +316,7 @@ class RequestForService(MessageHandler):
             # Send error message to current user
             yield from current_connection.send(response_message)
 
-class GetHistoryMessage(MessageHandler):
+class HistoryMessage(MessageHandler):
     """
     Get history message of current user
     """
