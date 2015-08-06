@@ -259,6 +259,14 @@ class HistoryMessage(Message):
 class HistoryMessageAck(object):
     """
     History messages
+
+    Message Format:
+
+    {'type':'history_ack', 'body': {'msgs': [...], 'total': 9999}}
+
+    @type: message type
+    @msgs: messages as dictionary
+    @total: total message count
     """
     __msgtype__ = MessageType.HISTORY_MESSAGE_ACK
 
@@ -285,6 +293,13 @@ class HistoryMessageAck(object):
 class SessionList(Message):
     """
     Get current session list
+
+    Message Format:
+
+    {'type': 'session_list', 'body': {'uid': 100}}
+
+    @type: message type
+    @uid: user id
     """
     __msgtype__ = MessageType.SESSION_LIST
 
@@ -374,6 +389,9 @@ class LogoutMessage(Message):
     For user logout or connection lost
 
     {'type': 'logout', 'body': {'uid': ''}}
+
+    @type: message type
+    @uid: user id
     """
     __msgtype__ = MessageType.LOGOUT
 

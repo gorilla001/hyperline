@@ -2,6 +2,7 @@
   <dictionary name="nmg">
     <words>
       <w>amqp</w>
+      <w>apiready</w>
       <w>asctime</w>
       <w>asyncio</w>
       <w>classmethod</w>

@@ -11,7 +11,7 @@ class NoValidSessionError(Exception):
 
 class Random(object):
     """
-    Get random session from specfied session list
+    Get random session from specified session list
     """
     @staticmethod
     def get(session_list):

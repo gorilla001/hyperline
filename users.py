@@ -22,6 +22,7 @@ class User(object):
         self._name = name
         self._role = role
         self._head_img = head_img
+        self._server = None
 
     def serialize(self):
         return pickle.dumps(self)
