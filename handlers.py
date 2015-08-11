@@ -58,6 +58,12 @@ class MessageHandler(metaclass=MetaHandler):
         # raise AttributeError()
         return asyncio.async(_handler().handle(msg, connection))
 
+    @staticmethod
+    def get_connection_manager(connection):
+        if connection.path == '/service':
+            return CustomServiceConnectionManager()
+        return NormalUserConnectionManager()
+
 
 class Login(MessageHandler):
     """
@@ -80,10 +86,11 @@ class Login(MessageHandler):
         connection.uid = msg.uid
         connection.name = msg.name
 
-        if connection.path == '/service':
-            _connection_manager = CustomServiceConnectionManager()
-        else:
-            _connection_manager = NormalUserConnectionManager()
+        # if connection.path == '/service':
+        #     _connection_manager = CustomServiceConnectionManager()
+        # else:
+        #     _connection_manager = NormalUserConnectionManager()
+        _connection_manager = self.get_connection_manager(connection)
 
         try:
             yield from self.login(_connection_manager, connection)
@@ -185,10 +192,11 @@ class SendTextMsg(MessageHandler):
         # current_connection = connection
         # _session = current_connection.associated_sessions.get(int(msg.recv), None)
         connection_path = self._redis.get(hex(int(msg.recv)))
-        if connection_path == b'/service':
-            _connection_manager = CustomServiceConnectionManager()
-        if connection_path == b'/':
-            _connection_manager = NormalUserConnectionManager()
+        # if connection_path == b'/service':
+        #     _connection_manager = CustomServiceConnectionManager()
+        # if connection_path == b'/':
+        #     _connection_manager = NormalUserConnectionManager()
+        _connection_manager = self.get_connection_manager(connection)
 
         _session = _connection_manager.get_connection(int(msg.recv))
         if _session is not None:
@@ -251,10 +259,11 @@ class Logout(MessageHandler):
     @asyncio.coroutine
     def handle(self, msg, connection):
         """Unregister user record from global session"""
-        if connection.path == '/service':
-            _connection_manager = CustomServiceConnectionManager()
-        else:
-            _connection_manager = NormalUserConnectionManager()
+        # if connection.path == '/service':
+        #     _connection_manager = CustomServiceConnectionManager()
+        # else:
+        #     _connection_manager = NormalUserConnectionManager()
+        _connection_manager = self.get_connection_manager(connection)
 
         _connection_manager.pop_connection(connection.uid)
 
@@ -270,10 +279,11 @@ class HeartBeat(MessageHandler):
 
     @asyncio.coroutine
     def handle(self, msg, connection):
-        if connection.path == '/service':
-            conn_mgr = CustomServiceConnectionManager()
-        else:
-            conn_mgr = NormalUserConnectionManager()
+        # if connection.path == '/service':
+        #     conn_mgr = CustomServiceConnectionManager()
+        # else:
+        #     conn_mgr = NormalUserConnectionManager()
+        conn_mgr = self.get_connection_manager(connection)
 
         conn_mgr.get_connection(msg.uid).touch()
 
