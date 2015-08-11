@@ -415,6 +415,30 @@ class HeartBeat(Message):
 
         return cls(uid)
 
+# internal message
+class HeartBeatAck(object):
+    """
+    When server received heartbeat message from client, it will send heartbeat-ack message back.
+    If client didn't received heartbeat-ack messages after 5 minutes, it will means that the server
+    has lost. The client should reconnect the server for conversation.
+    """
+    __msgtype__ = MessageType.HEARTBEAT_ACK
+
+    # def __init__(self):
+    #     self._uid = None
+    #
+    # @property
+    # def uid(self):
+    #     return self._uid
+    #
+    # @uid.setter
+    # def uid(self, uid):
+    #     self._uid = uid
+
+    @property
+    def json(self):
+        return {'type': self.__msgtype__}
+
     
 class LogoutMessage(Message):
     """
