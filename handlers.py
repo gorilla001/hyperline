@@ -15,7 +15,7 @@ from messages import (MessageType,
                       LoginSucceed,
                       LoginFailed,
                       CustomServiceReady,
-                      CustomService,
+                      CustomServiceAck,
                       SessionList,
                       HeartBeatAck)
 
@@ -313,7 +313,7 @@ class CustomService(MessageHandler):
             yield from custom_service.send(ready_message)
 
             # Send ready message to current user
-            response_message = CustomService()
+            response_message = CustomServiceAck()
             response_message.status = 200
             response_message.uid = custom_service.uid
             response_message.name = custom_service.name
@@ -336,7 +336,7 @@ class CustomService(MessageHandler):
             self._redis.set(custom_service.uid, users)
 
         except IndexError:
-            response_message = RequestForServiceResponse()
+            response_message = CustomServiceAck()
             response_message.status = 404
 
             # Send error message to current user
