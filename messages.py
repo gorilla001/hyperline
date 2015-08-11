@@ -386,6 +386,36 @@ class TextMessage(Message):
         return {'type': self.__msgtype__.value,
                 'body': {'sndr': self.sndr, 'recv': self.recv, 'content': self.content, 'timestamp': self.timestamp}}
 
+class HeartBeat(Message):
+    """
+    Clients will send heartbeat messages every 5 minutes. If didn't get heartbeat after 5 minutes, the client maybe
+    lost, so we should clean it from connection manager, and notify others if is necessary.
+
+    When server received heartbeat from clients, the client connection should be touched for delaying timed-out.
+    If the client connection didn't touched after 5 minutes, it will be explored, means it will be timed-out from
+    connection manager and will be cleaned up.
+
+    The message format is like this: {'type': 'heartbeat', 'uid': 'unique-user-id'}
+    """
+    __msgtype__ = MessageType.HEARTBEAT
+
+    def __init__(self, uid):
+        self.uid = uid
+
+    @classmethod
+    def factory(cls, msg):
+        msg = msg['body']
+        try:
+            uid = msg['uid']
+        except KeyError:
+            raise MessageFormatError("Malformed msg {}".format(msg))
+
+        if not validate_int()(uid):
+            raise ValidatedError("uid must be integer")
+
+        return cls(uid)
+
+    
 class LogoutMessage(Message):
     """
     For user logout or connection lost

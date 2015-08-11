@@ -66,11 +66,7 @@ class Login(MessageHandler):
     def handle(self, msg, connection):
 
         """
-        Register user in session manager.
-
-        If user role is normal, the session will be added into NormalUserSessionManager,
-        if user role is custom service, the session will be added into CustomServiceSessionManager,
-        if user role is sports man, the session will be added into SportsManSessionManager.
+        Register user in connection manager.
 
         """
         connection.uid = msg.uid
