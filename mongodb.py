@@ -76,7 +76,7 @@ class MongoProxy(object):
 
         return coll.find({"$and": [{'recv': recv}, {'status': status}]})
 
-    def get_msgs_by_count(self, recv, offset=0, count=0, invent='messages'):
+    def get_msgs_by_count(self, sndr, recv, offset=0, count=0, invent='messages'):
         """
         Get messages by offset and messages count.
         @param offset: control where MongoDB begins returning results
@@ -86,14 +86,40 @@ class MongoProxy(object):
         @return: history messages
         """
         coll = self.connection[self.db][invent]
-        return coll.find({'body.recv': recv}).sort([('body.timestamp', 1)]).skip(offset).limit(count)
+        query = {
+            "$or": [
+                {"$and": [
+                    {'body.sndr': sndr},
+                    {'body.recv': recv},
+                ]},
+                {"$and": [
+                    {'body.sndr': recv},
+                    {'body.recv': sndr},
+                ]}
+            ]
 
-    def total_message(self, recv, invent='messages'):
+        }
+        return coll.find(query).sort([('body.timestamp', 1)]).skip(offset).limit(count)
+
+    def total_message(self, sndr, recv, invent='messages'):
         """
         Get messages total count
         """
         coll = self.connection[self.db][invent]
-        return coll.find({'body.recv': recv}).count()
+        query = {
+            "$or": [
+                {"$and": [
+                    {'body.sndr': sndr},
+                    {'body.recv': recv},
+                ]},
+                {"$and": [
+                    {'body.sndr': recv},
+                    {'body.recv': sndr},
+                ]}
+            ]
+
+        }
+        return coll.find(query).count()
 
 
 class RedisProxy(object):

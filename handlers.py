@@ -350,31 +350,35 @@ class HistoryMessage(MessageHandler):
 
     @asyncio.coroutine
     def handle(self, msg, connection):
+        sndr = msg.sndr
         recv = msg.recv
         offset = msg.offset
         count = msg.count
 
-        history_messages = yield from self.get_history_msgs(recv, offset, count)
+        history_messages, total_count = yield from self.get_history_msgs(sndr, recv, offset, count)
 
-        yield from self.send_history_msgs(history_messages, connection, recv)
+        yield from self.send_history_msgs(history_messages, connection, total_count)
 
     @asyncio.coroutine
-    def get_history_msgs(self, recv, offset, count):
+    def get_history_msgs(self, sndr, recv, offset, count):
         # Get offline msg from mongodb.
         logger.info('history message')
-        return self._mongodb.get_msgs_by_count(recv=recv, offset=offset, count=count)
+        messages = self.get_msgs_from_db(sndr=sndr, recv=recv, offset=offset, count=count)
+        total = self.get_msg_count(sndr=sndr, recv=recv)
+        
+        return messages, total
 
     @asyncio.coroutine
-    def send_history_msgs(self, history_msgs, connection, recv):
+    def send_history_msgs(self, history_msgs, connection, total_count):
         """
         Send offline msgs to current user
         """
         message = HistoryMessage()
-        total_message = self.total_message(recv=recv)
+        # total_message = self.total_message(recv=recv)
         for msg in history_msgs:
             del msg['_id']
             message.append(msg['body'])
-        message.total = total_message
+        message.total = total_count
         try:
             # Normal Socket use method `write` to send message, while Web Socket use method `send`
             # For Web Socket, just send raw message
@@ -392,8 +396,12 @@ class HistoryMessage(MessageHandler):
         except Exception:
             raise
 
-    def total_message(self, recv):
-        return self._mongodb.total_message(recv=recv)
+    def get_msgs_from_db(self, sndr, recv, offset, count):
+        return self._mongodb.get_msgs_by_count(sndr=sndr, recv=recv, offset=offset, count=count)
+
+    def get_msg_count(self, sndr, recv):
+        return self._mongodb.total_message(sndr=sndr, recv=recv)
+    #     return self._mongodb.total_message(recv=recv)
 
 class ErrorHandler(MessageHandler):
     """
