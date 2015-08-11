@@ -192,11 +192,11 @@ class SendTextMsg(MessageHandler):
         # current_connection = connection
         # _session = current_connection.associated_sessions.get(int(msg.recv), None)
         connection_path = self._redis.get(hex(int(msg.recv)))
-        # if connection_path == b'/service':
-        #     _connection_manager = CustomServiceConnectionManager()
-        # if connection_path == b'/':
-        #     _connection_manager = NormalUserConnectionManager()
-        _connection_manager = self.get_connection_manager(connection)
+        if connection_path == b'/service':
+            _connection_manager = CustomServiceConnectionManager()
+        if connection_path == b'/':
+            _connection_manager = NormalUserConnectionManager()
+        # _connection_manager = self.get_connection_manager(connection)
 
         _session = _connection_manager.get_connection(int(msg.recv))
         if _session is not None:

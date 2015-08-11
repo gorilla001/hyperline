@@ -467,6 +467,42 @@ class LogoutMessage(Message):
 
         return cls(uid)
 
+class MessageBox(object):
+    """
+    Messages container for storing messages.When box depth reached, the messages will be store in mongodb, and the box
+    will be cleaned empty.
+    """
+    def __init__(self, depth=10):
+        self.depth = depth
+        self.msgs = []
+
+    @property
+    def size(self):
+        return len(self.msgs)
+
+    @property
+    def is_full(self):
+        # box is full
+        return len(self.msgs) == self.depth
+
+    def push(self, msg):
+        self.msgs.append(msg)
+        self.save()
+
+    def save(self):
+        if self.is_full:
+            # save the message
+            self.save_msgs()
+
+            # clean up box
+            self.empty()
+
+    def save_msgs(self):
+        pass
+
+    def empty(self):
+        self.msgs = []
+
 # class ReplyMessage(Message):
 #     """
 #     Used for sender back to client with custom service id
