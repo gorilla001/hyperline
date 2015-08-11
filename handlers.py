@@ -11,7 +11,14 @@ import logging
 # from session import SessionManager
 from managers import NormalUserConnectionManager, CustomServiceConnectionManager
 from mongodb import MongoProxy, RedisProxy
-from messages import MessageType, LoginSucceed, LoginFailed, CustomServiceReady, CustomService, SessionList
+from messages import (MessageType,
+                      LoginSucceed,
+                      LoginFailed,
+                      CustomServiceReady,
+                      CustomService,
+                      SessionList,
+                      HeartBeatAck)
+
 from messages import HistoryMessage
 import constant as cfg
 
@@ -50,6 +57,7 @@ class MessageHandler(metaclass=MetaHandler):
         #     return asyncio.async(_handler().handle(msg, connection))
         # raise AttributeError()
         return asyncio.async(_handler().handle(msg, connection))
+
 
 class Login(MessageHandler):
     """
@@ -261,9 +269,21 @@ class HeartBeat(MessageHandler):
     __msgtype__ = MessageType.HEARTBEAT
 
     @asyncio.coroutine
-    def handle(self, msg, _):
-        session = self._session_manager.get_session(msg.uid)
-        session.touch()
+    def handle(self, msg, connection):
+        if connection.path == '/service':
+            conn_mgr = CustomServiceConnectionManager()
+        else:
+            conn_mgr = NormalUserConnectionManager()
+
+        conn_mgr.get_connection(msg.uid).touch()
+
+        try:
+            if connection.is_websockt:
+                connection.send(HeartBeatAck().json)
+            else:
+                connection.write(HeartBeatAck().json)
+        except Exception:
+            raise
 
 class CustomService(MessageHandler):
 

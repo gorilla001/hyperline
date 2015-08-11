@@ -439,7 +439,7 @@ class HeartBeatAck(object):
     def json(self):
         return {'type': self.__msgtype__}
 
-    
+
 class LogoutMessage(Message):
     """
     For user logout or connection lost
