@@ -82,10 +82,10 @@ class Login(MessageHandler):
             _connection_manager = NormalUserConnectionManager()
 
         try:
-            yield from self.register(_connection_manager, connection)
-            yield from self.register_succeed(connection)
+            yield from self.login(_connection_manager, connection)
+            yield from self.login_succeed(connection)
         except KeyError as exc:
-            yield from self.register_failed(connection, exc)
+            yield from self.login_failed(connection, exc)
 
         yield from self.send_associated_users(connection)
 
@@ -96,7 +96,7 @@ class Login(MessageHandler):
         yield from self.send_offline_msgs(offline_msgs, connection)
 
     @asyncio.coroutine
-    def register(self, connection_manager, connection):
+    def login(self, connection_manager, connection):
         # Register user in connection manager
         try:
             connection_manager.add_connection(connection)
@@ -108,12 +108,12 @@ class Login(MessageHandler):
         self._redis.set(hex(int(connection.uid)), connection.path)
 
     @asyncio.coroutine
-    def register_succeed(self, connection):
+    def login_succeed(self, connection):
         # Send successful reply
         yield from connection.send(LoginSucceed())
 
     @asyncio.coroutine
-    def register_failed(self, connection, exc):
+    def login_failed(self, connection, exc):
         # Send successful failed
         yield from connection.send(LoginFailed(reason=str(exc)))
 
