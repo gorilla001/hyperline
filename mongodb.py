@@ -13,6 +13,7 @@ import asyncio
 
 logger = logging.getLogger(__name__)
 
+
 class MongoProxy(object):
     def __init__(self, host, port, db):
         self.host = host

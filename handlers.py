@@ -25,6 +25,7 @@ import constant as cfg
 
 logger = logging.getLogger(__name__)
 
+
 class MessageHandler(metaclass=MetaHandler):
 
     """
@@ -365,7 +366,7 @@ class HistoryMessage(MessageHandler):
         logger.info('history message')
         messages = self.get_msgs_from_db(sndr=sndr, recv=recv, offset=offset, count=count)
         total = self.get_msg_count(sndr=sndr, recv=recv)
-        
+
         return messages, total
 
     @asyncio.coroutine

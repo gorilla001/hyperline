@@ -11,6 +11,7 @@ import log as logging
 
 logger = logging.getLogger(__name__)
 
+
 class SessionManager(metaclass=MetaSession):
     """
     Manage session objects.
@@ -136,6 +137,7 @@ class CustomServiceSessionManager(SessionManager):
 #         # Get session associated by client if exists.
 #
 #         return self.sessions.get(client)
+
 
 class Session(object):
     """
